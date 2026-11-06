@@ -126,3 +126,27 @@ Une fixture navigateur dans `tests/e2e/fixtures/` utilise la scène de productio
 Le port `RenderRuntime` expose `whenReady(): Promise<void>`. La composition renvoie cette disponibilité via `app.ready`, libère le runtime en cas d'échec et conserve la cause technique. Le point d'entrée traite l'erreur et ne présente le statut prêt qu'après une image complète. `watchSceneReadiness.ts` possède les observateurs de démarrage et les retire à la résolution, au rejet ou au démontage.
 
 Les caches Vite du développement, des unitaires et des tests navigateur sont distincts. Voir [la décision 0001](docs/decisions/0001-vite-cache-et-preparation-du-rendu.md) pour le défaut observé, les choix et le scénario de non-régression à deux serveurs.
+
+## Mise en place à T04
+
+Le domaine `cameras/` contient les définitions sérialisables, neuf préréglages, leur registre et le calcul du frustum. `CameraRegistry` possède la sélection, les poses et la visibilité des aides ; ses abonnements projettent cet état vers le rendu et l'aide HTML. La pose de régie est également une configuration pure (`observerView.ts`).
+
+`createBabylonRuntime.ts` assemble la scène de concert et son observateur, puis le registre, `createCaptureCameras.ts` et `attachCameraControls.ts`. La factory de scène de base reste utilisable sans les représentations pour les recettes du concert. Les caméras de captation sont parentées aux rigs et ne reçoivent aucune entrée utilisateur. Le point de vue principal ne change pas lors d'une sélection.
+
+Le renderer possède les boîtiers, labels, textures et le frustum unique ; l'adaptateur d'interaction possède le picking, les raccourcis et les abonnements aux boutons. Leur destruction est appelée par le runtime et reste idempotente. Les helpers utilisent le bit de couche 2, les caméras de captation uniquement le bit 1. Les détails du contrat sont décrits dans [la décision 0002](docs/decisions/0002-poses-et-selection-des-cameras.md).
+
+## Mise en place à T05
+
+`createConcertScene` expose les références des écrans et groupes thématiques ; le raccourci `createObservationScene` conserve les recettes de scène de base. Le runtime branche directement le handle de C1 sur celui de l'écran gauche, sans recherche par nom de mesh.
+
+`domain/rendering/cameraFeed.ts` valide les dimensions et définit la règle des catégories filmables. Les ports génériques `CameraFeedPort` et `ScreenTexturePort`, ainsi que `bindPreparedFeed`, isolent la liaison différée de BabylonJS. L'adaptateur `rendering/createCameraFeed.ts` possède le renderer, la RTT, sa liste réutilisée et ses observateurs ; `createFirstScreenFeed.ts` assemble la liaison et attend sa première présentation.
+
+La route est fixe C1 → écran 1 à cette étape. Le partage entre consommateurs et les routes interactives restent à T06. La disponibilité d'une image réelle est distinguée des contrôles de disponibilité du moteur, comme décrit dans [la décision 0003](docs/decisions/0003-premier-flux-sur-ecran.md).
+
+## Mise en place à T06
+
+`domain/direction/screenRouting.ts` calcule une nouvelle table complète après validation de tous les identifiants. `application/commands/routingDirector.ts` possède les cibles et routes validées ; la sélection reste celle de `CameraRegistry`. Une commande capture caméra et cibles à son invocation, interdit une deuxième coupe concurrente et laisse préparer les sélections suivantes.
+
+`FeedRouter` possède les flux via des ports génériques, sans dépendance BabylonJS. La préparation réutilise les sources existantes ; la validation remplace toutes les textures dans une opération synchrone, attend leur présentation puis libère les sources sans consommateur. Le rollback restaure les textures et les sources suspendues. L'adaptateur `createRoutingRenderer` fournit les ports de matériaux, les mires « SANS SIGNAL » et les factories natives. L'interface `ui/attachRoutingControls.ts` traduit les gestes HTML en commandes et reflète l'état validé ; elle ne possède aucun flux.
+
+Pour conserver au plus trois passes vidéo actives pendant une coupe depuis trois sources, un ancien flux devenu inutile dans la prochaine table peut être suspendu. Sa dernière image reste lisible jusqu'au remplacement ; sa texture est libérée après présentation. La commande publique ajoute au maximum une nouvelle source et peut donc conserver temporairement quatre textures allouées, avec au plus trois rendues. Voir [la décision 0004](docs/decisions/0004-routage-transactionnel.md).

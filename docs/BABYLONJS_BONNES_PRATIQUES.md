@@ -40,6 +40,7 @@ Ce document guide la future implémentation. Les API citées sont des pistes vé
 - Fixer surfaces et RTT en 16:9 ; ne pas étirer les images. Tester une mire asymétrique pour détecter miroir, retournement UV et mauvais cadrage.
 - Valider que le ratio de projection de chaque caméra de flux correspond à sa RTT, indépendamment du ratio du canvas. Éviter qu'une matrice de projection en cache conserve le ratio de la vue principale.
 - Distinguer « prêt », « sans signal » et « erreur ». Une réaffectation ne montre pas un tampon GPU non initialisé : afficher le nouveau flux après son premier rendu valide.
+- Ne pas utiliser les événements RTT de bind/unbind ou `onAfterRenderObservable` comme preuve de dessin : ils peuvent aussi venir des vérifications de disponibilité. Employer l’événement de dessin de `ObjectRenderer`, puis vérifier la disponibilité hors passe GPU. Si le renderer est fourni à la RTT, le libérer explicitement.
 
 ## Interface 3D et entrées
 
@@ -73,3 +74,9 @@ Ce document guide la future implémentation. Les API citées sont des pistes vé
 - [Sources officielles du moteur NullEngine](https://github.com/BabylonJS/Babylon.js/blob/master/packages/dev/core/src/Engines/nullEngine.ts).
 
 La stratégie de partage des flux et la séparation métier/moteur sont des choix de ce projet, fondés sur ces mécanismes ; elles ne constituent pas des prescriptions de BabylonJS.
+
+### Coupes multiécrans et budget de rendu
+
+Préparer une première image avant de modifier les textures des matériaux. Remplacer les références de tous les écrans ciblés entre deux images et conserver les anciennes ressources jusqu'à la première présentation réussie. En cas d'échec, restaurer l'affectation complète. La suppression d'un consommateur ne détruit pas un flux encore utilisé ailleurs.
+
+Distinguer textures allouées et RTT programmées dans `scene.customRenderTargets`. Pour préparer une coupe depuis trois sources sans quatrième passe active, suspendre une source devenue inutile dans la prochaine table en conservant sa dernière image ; la reprendre si la préparation échoue. Le renderer possède et nettoie aussi les allocations partielles en cas d'échec GPU. Les écrans ne détruisent jamais les textures partagées.

@@ -2,7 +2,9 @@
 
 Laboratoire pédagogique BabylonJS : positionner neuf caméras virtuelles et réaliser la retransmission d'un concert sur trois écrans 3D.
 
-T01 à T03 sont implémentées : caméra d'observation, plateau de concert, structures, enceintes, barrières, trois écrans 16:9 avec mires et quatre musiciens avec instruments 3D. Le chanteur est au centre, le guitariste à gauche, le bassiste à droite et le batteur sur l'estrade. Guitare, basse, batterie, micros et amplificateurs sont construits avec des primitives locales. Les caméras de captation arriveront à T04 ; les flux seront ajoutés à T05/T06.
+T01 à T06 sont implémentées : caméra d'observation, plateau de concert, structures, enceintes, barrières, quatre musiciens avec instruments 3D et neuf caméras de captation représentées par leurs boîtiers et labels C1…C9. Cliquer dessus sélectionne une caméra et affiche ses aides de cadrage. Les trois écrans 16:9 démarrent sur C1 en direct.
+
+Dans **Régie**, choisir une caméra par la liste ou son boîtier 3D, cocher les écrans cibles puis appuyer sur **DIFFUSER**. La sélection seule conserve la diffusion précédente. **Tous les écrans** coche les trois destinations ; décocher toutes les cibles désactive DIFFUSER. Les lignes « Écran n ← Cn » indiquent les routes réellement validées. Une même caméra peut alimenter plusieurs écrans ou chaque écran montrer une source différente. La coupe attend une image préparée ; une erreur conserve les routes précédentes et affiche un message. Les contrôles HTML seront remplacés par le panneau 3D à T08. La manipulation des caméras à la souris sera ajoutée à T07.
 
 ## Démarrer
 
@@ -13,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Ouvrir l'adresse indiquée par Vite (habituellement http://127.0.0.1:5173 ; le port suivant est choisi si nécessaire). Le clavier est actif dès l'ouverture. Z ou ↑ avance, S ou ↓ recule, Q ou ← déplace à gauche, D ou → à droite, sur le plan horizontal dans la direction du regard. Les touches sont lues selon leur lettre AZERTY. Glisser avec le bouton gauche pour orbiter, avec le bouton droit pour déplacer la cible ; utiliser la molette ou le défilement à deux doigts du trackpad pour zoomer. Les événements de pincement traduits en Ctrl+wheel sont aussi pris en charge par le contrôle BabylonJS. Après un clic hors de la scène, recliquer dans celle-ci pour réactiver le clavier. Les déplacements s'arrêtent à la perte de focus.
+Ouvrir l'adresse indiquée par Vite (habituellement http://127.0.0.1:5173 ; le port suivant est choisi si nécessaire). Le clavier est actif dès l'ouverture. Z ou ↑ avance, S ou ↓ recule, Q ou ← déplace à gauche, D ou → à droite, sur le plan horizontal dans la direction du regard. Les touches sont lues selon leur lettre AZERTY. Glisser avec le bouton gauche pour orbiter, avec le bouton droit pour déplacer la cible ; utiliser la molette ou le défilement à deux doigts du trackpad pour zoomer. Les événements de pincement traduits en Ctrl+wheel sont aussi pris en charge par le contrôle BabylonJS. Après un clic hors de la scène, recliquer dans celle-ci pour réactiver le clavier. Les déplacements s'arrêtent à la perte de focus. **R** ou le bouton **Vue régie** restaure la vue d'observation sans changer les caméras de captation. **H** ou le bouton d'aides masque/affiche le frustum de la caméra sélectionnée. **Réinitialiser Cn** restaure son préréglage.
 
 ## Valider
 
@@ -43,6 +45,9 @@ PLAYWRIGHT_BROWSERS_PATH=/private/tmp/virtual-cameras-playwright npm run test:e2
 - [Validation et limites de T01](docs/validation/T01.md)
 - [Validation de T02 et des déplacements](docs/validation/T02.md)
 - [Validation de T03 : musiciens et instruments](docs/validation/T03.md)
+- [Validation de T04 : caméras et sélection](docs/validation/T04.md)
+- [Validation de T05 : premier flux sur écran](docs/validation/T05.md)
+- [Validation de T06 : régie multiécran](docs/validation/T06.md)
 
 Lire ces documents avant de poursuivre l'implémentation.
 

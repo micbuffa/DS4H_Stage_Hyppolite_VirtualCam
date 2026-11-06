@@ -9,6 +9,7 @@ const glyphs: Record<string, string> = {
   G: '01111 10000 10000 10111 10001 10001 01110',
   H: '10001 10001 10001 11111 10001 10001 10001',
   I: '11111 00100 00100 00100 00100 00100 11111',
+  L: '10000 10000 10000 10000 10000 10000 11111',
   M: '10001 11011 10101 10101 10001 10001 10001',
   N: '10001 11001 10101 10011 10001 10001 10001',
   O: '01110 10001 10001 10001 10001 10001 01110',
@@ -26,7 +27,7 @@ const glyphs: Record<string, string> = {
 };
 
 /** RGBA bytes bottom-row first, matching the default Babylon plane UVs. */
-export function createTestPattern(id: number, name: string): Uint8Array {
+export function createTestPattern(id: number, name: string, offline = false): Uint8Array {
   const data = new Uint8Array(patternWidth * patternHeight * 4);
   const rect = (left: number, top: number, width: number, height: number, color: readonly number[]) => {
     for (let y = top; y < Math.min(top + height, patternHeight); y++) {
@@ -47,13 +48,13 @@ export function createTestPattern(id: number, name: string): Uint8Array {
   };
   rect(0, 0, patternWidth, patternHeight, [12, 22, 34]);
   const colors = [[230, 235, 235], [232, 201, 82], [75, 197, 203], [84, 176, 115], [187, 105, 183], [214, 89, 82], [70, 113, 196], [40, 51, 66]];
-  colors.forEach((color, i) => rect(i * 64, 35, 64, 46, color));
+  if (!offline) colors.forEach((color, i) => rect(i * 64, 35, 64, 46, color));
   rect(0, 0, 20, 20, [75, 197, 203]);
   rect(492, 268, 20, 20, [214, 89, 82]);
-  text('HAUT 16:9', 175, 10, 2);
+  text(offline ? 'SANS SIGNAL' : 'HAUT 16:9', 175, 10, 2);
   const title = `${id} ${name}`;
   text(title, Math.round((512 - title.length * 30) / 2), 110, 5);
-  text('MIRE STATIQUE', 139, 164, 3);
+  text(offline ? 'SANS SIGNAL' : 'MIRE STATIQUE', 139, 164, 3);
   for (let i = 0; i < 8; i++) rect(30 + i * 56, 215, 56, 17, [i * 35, i * 35, i * 35]);
   text('GAUCHE', 28, 255, 2);
   text('DROITE', 412, 255, 2);

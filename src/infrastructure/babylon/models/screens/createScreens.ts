@@ -50,7 +50,7 @@ export function createScreens(scene: Scene, definitions: readonly ScreenDefiniti
         support.metadata = { category: 'concert', theme: 'screens', screenId: id };
       }
     }
-    return { definition, root, frame, surface };
+    return { definition, root, frame, surface, material };
   });
   return { ...group, screens };
 }

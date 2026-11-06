@@ -1,6 +1,6 @@
 # Caméras virtuelles — spécification et tâches incrémentales
 
-Version : 1.2 — 6 novembre 2026. Statut : T00 à T03 réalisées ; T04 est l’étape active du suivi, à implémenter ; T05 à T11 restent à réaliser. Documents associés : [instructions IA](AGENTS.md), [architecture](ARCHITECTURE.md), [bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md).
+Version : 1.5 — 6 novembre 2026. Statut : T00 à T06 réalisées ; T07 est la prochaine tâche, non commencée ; T08 à T11 restent à réaliser. Documents associés : [instructions IA](AGENTS.md), [architecture](ARCHITECTURE.md), [bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md).
 
 ## 1. Objectif pédagogique
 
@@ -143,7 +143,7 @@ Ne pas tester des pixels avec `NullEngine`. Les tests unitaires de gestion des f
 
 Les cases ne seront cochées qu'une fois les critères et tests satisfaits. Chaque étape doit laisser une application utilisable ; les fixtures provisoires nécessaires aux étapes initiales sont retirées quand leur remplacement est validé.
 
-Suivi : `[DONE]` indique une tâche terminée et validée ; `[CURRENT]` désigne l’étape active à traiter. T04 n’a pas encore été implémentée. Les tâches suivantes restent sans marqueur.
+Suivi : `[DONE]` indique une tâche terminée et validée ; `[CURRENT]` désigne l’étape active à traiter. T07 est la prochaine tâche ; son implémentation n’a pas encore commencé. Les tâches suivantes restent sans marqueur.
 
 ### T00 [DONE] — Préparer la documentation pour les assistants
 
@@ -181,34 +181,37 @@ Dépendance : T02. Quatre personnages, leurs instruments et accessoires procédu
 - **I** : présence des groupes attendus, parentage correct et suppression complète d'un groupe.
 - **B/M** : reconnaissance des instruments et absence d'interpénétration majeure.
 
-### T04 [CURRENT] — Créer les neuf caméras et leurs représentations
+### T04 [DONE] — Créer les neuf caméras et leurs représentations
 
 Dépendances : T03. Registre, préréglages, boîtiers, labels, sélection unique et retour à la vue régie ; sélection provisoire par clic sur boîtier avant le panneau T08.
 
-- [ ] Critères : neuf plans distincts, observation indépendante, aide/frustum de la sélection activable.
+- [x] Critères : neuf plans distincts, observation indépendante, aide/frustum de la sélection activable.
+- Validation : 101 tests unitaires/intégration et 17 tests navigateur réussis ; voir [compte rendu T04](docs/validation/T04.md).
 - **U** : IDs uniques 1..9 ; ID invalide refusé ; sélection unique ; sélection sans effet sur routage ; réinitialisation du préréglage ciblé uniquement.
-- **I** : neuf caméras plus observation ; synchronisation pose/rig ; un seul gizmo/frustum de sélection ; aucun contrôle souris attaché aux caméras de captation.
+- **I** : neuf caméras plus observation ; synchronisation pose/rig ; un seul frustum de sélection (gizmos d’édition à T07) ; aucun contrôle souris attaché aux caméras de captation.
 - **B** : picking des boîtiers, retour régie sans modification métier.
 
-### T05 — Établir un premier flux de captation
+### T05 [DONE] — Établir un premier flux de captation
 
 Dépendance : T04. Afficher C1 sur l'écran 1 via une RTT ; les autres écrans gardent la mire pendant cette étape. Introduire le gestionnaire de flux et le filtrage des éléments filmables.
 
-- [ ] Critères : image en direct, pas de récursion, pas d'aide dans le flux, format correct même avec canvas non 16:9.
+- [x] Critères : image en direct, pas de récursion, pas d'aide dans le flux, format correct même avec canvas non 16:9.
+- Validation : 113 tests unitaires/intégration et 19 tests navigateur réussis, contrôle direct du serveur 5188 ; voir [compte rendu T05](docs/validation/T05.md).
 - **U** : constitution du filtre par catégorie ; exclusion des trois surfaces vidéo et de toutes les aides ; inclusion d'un musicien ajouté après initialisation ; configuration du ratio.
 - **I** : caméra du flux et liste de rendu correctes ; enregistrement unique de la RTT ; caméra principale conservée avant/après la passe.
 - **B** : mire asymétrique temporaire, projection cohérente et mouvement visible en direct ; aucune erreur GPU liée à une lecture/écriture de la même texture.
 
-### T06 — Généraliser le routage sur trois écrans
+### T06 [DONE] — Généraliser le routage sur trois écrans
 
 Dépendance : T05. État de réalisation, cibles multiples, commande atomique, partage des RTT et états sans signal/erreur. Démonstration via adaptateur de commande provisoire avant T08.
 
-- [ ] Critères : 1→N et trois sources simultanées ; sélections indépendantes ; initialisation finale des trois écrans sur C1.
+- [x] Critères : 1→N et trois sources simultanées ; sélections indépendantes ; initialisation finale des trois écrans sur C1.
+- Validation : 141 tests unitaires/intégration et 23 tests navigateur réussis ; contrôle direct du serveur 5188 sans erreur et shaders HTTP 200. Voir [compte rendu T06](docs/validation/T06.md).
 - **U** : table d'affectation pour tous les sous-ensembles non vides des trois écrans ; cibles vides ; IDs invalides ; idempotence ; préservation des écrans non ciblés ; source partagée ; suppression du dernier consommateur ; échec de préparation sans effet partiel.
 - **I** : une RTT pour trois écrans sur C1 ; trois RTT pour trois sources ; retour à une RTT après regroupement ; arrêt détruisant une seule fois les ressources partagées.
 - **B** : scénarios globaux 2, 3, 5, 6 et 7 ; aucune image noire transitoire issue d'un tampon non initialisé lors d'une coupe prête.
 
-### T07 — Manipuler les caméras à la souris
+### T07 [CURRENT] — Manipuler les caméras à la souris
 
 Dépendance : T06. Gizmos de position et rotation, FOV, visée scène, annulation et réinitialisation ; commandes provisoires accessibles en attendant T08.
 

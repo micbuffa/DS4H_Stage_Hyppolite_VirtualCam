@@ -11,7 +11,7 @@ test('renders WebGL2, orbits and resizes without console errors', async ({ page 
   await expect(canvas).toBeVisible();
   await expect(canvas).toBeFocused();
   await expect(canvas).toHaveScreenshot('stage-and-test-patterns.png', { maxDiffPixelRatio: 0.005 });
-  await page.screenshot({ path: 'test-results/t03-initial.png' });
+  await page.screenshot({ path: 'test-results/t05-initial.png' });
   const before = await canvas.screenshot();
   await page.mouse.move(650, 360);
   await page.mouse.down();
@@ -20,7 +20,7 @@ test('renders WebGL2, orbits and resizes without console errors', async ({ page 
   await expect(async () => { expect((await canvas.screenshot()).equals(before)).toBe(false); }).toPass();
   await page.setViewportSize({ width: 960, height: 600 });
   await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => [element.width, element.height])).toEqual([960, 600]);
-  await page.screenshot({ path: 'test-results/t03-orbit.png' });
+  await page.screenshot({ path: 'test-results/t05-orbit.png' });
   expect(errors).toEqual([]);
 });
 

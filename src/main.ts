@@ -5,6 +5,7 @@ import { createBabylonRuntime } from './infrastructure/babylon/engine/createBaby
 
 const canvas = document.querySelector<HTMLCanvasElement>('#renderCanvas');
 const status = document.querySelector<HTMLParagraphElement>('#status');
+const feedStatus = document.querySelector<HTMLParagraphElement>('#feed-status');
 if (!canvas || !status) throw new Error('Le canvas ou la zone de statut est absent.');
 
 try {
@@ -20,9 +21,11 @@ try {
     if (detached) return;
     status.textContent = error instanceof Error ? error.message : 'La préparation du rendu a échoué.';
     status.dataset.state = 'error';
+    if (feedStatus) feedStatus.textContent = 'Flux indisponible · Rechargez la page.';
   });
   import.meta.hot?.dispose(() => { detached = true; app.dispose(); });
 } catch (error) {
   status.textContent = error instanceof Error ? error.message : 'La vue 3D est indisponible.';
   status.dataset.state = 'error';
+  if (feedStatus) feedStatus.textContent = 'Flux indisponible · Rechargez la page.';
 }

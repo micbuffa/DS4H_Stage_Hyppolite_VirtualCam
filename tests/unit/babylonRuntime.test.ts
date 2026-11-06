@@ -1,7 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 
-const { engine, scene, detachKeyboard } = vi.hoisted(() => ({
+const { engine, scene, detachKeyboard, detachCameraControls, disposeCameras, disposeFeed } = vi.hoisted(() => ({
   detachKeyboard: vi.fn(),
+  detachCameraControls: vi.fn(),
+  disposeCameras: vi.fn(),
+  disposeFeed: vi.fn(),
   engine: {
     webGLVersion: 2,
     runRenderLoop: vi.fn(), stopRenderLoop: vi.fn(),
@@ -14,8 +17,12 @@ const { engine, scene, detachKeyboard } = vi.hoisted(() => ({
 }));
 vi.mock('../../src/infrastructure/babylon/interaction/attachObserverKeyboard', () => ({ attachObserverKeyboard: () => detachKeyboard }));
 vi.mock('../../src/infrastructure/babylon/engine/watchSceneReadiness', () => ({ watchSceneReadiness: () => ({ ready: Promise.resolve(), dispose: vi.fn() }) }));
+vi.mock('../../src/infrastructure/babylon/cameras/createCaptureCameras', () => ({ createCaptureCameras: () => ({ dispose: disposeCameras, rigs: new Map([[1, { camera: {} }]]) }) }));
+vi.mock('../../src/infrastructure/babylon/interaction/attachCameraControls', () => ({ attachCameraControls: () => detachCameraControls }));
+vi.mock('../../src/infrastructure/babylon/rendering/createRoutingRenderer', () => ({ createRoutingRenderer: () => ({ prepare: vi.fn().mockResolvedValue({ commit: async () => undefined, complete: vi.fn(), rollback: vi.fn() }), dispose: disposeFeed }) }));
+vi.mock('../../src/infrastructure/babylon/ui/attachRoutingControls', () => ({ attachRoutingControls: () => vi.fn() }));
 vi.mock('@babylonjs/core/Engines/engine', () => ({ Engine: class { constructor() { return engine; } } }));
-vi.mock('../../src/infrastructure/babylon/engine/createObservationScene', () => ({ createObservationScene: () => scene }));
+vi.mock('../../src/infrastructure/babylon/engine/createObservationScene', () => ({ createConcertScene: () => ({ scene, screens: { screens: [{ definition: { id: 1 } }] } }) }));
 import { createBabylonRuntime } from '../../src/infrastructure/babylon/engine/createBabylonRuntime';
 
 beforeEach(() => { vi.clearAllMocks(); engine.webGLVersion = 2; });
@@ -37,6 +44,9 @@ it('stops the same render callback, detaches controls and disposes owned resourc
   expect(engine.runRenderLoop).toHaveBeenCalledOnce();
   expect(engine.stopRenderLoop).toHaveBeenCalledExactlyOnceWith(render);
   expect(detachKeyboard).toHaveBeenCalledOnce();
+  expect(detachCameraControls).toHaveBeenCalledOnce();
+  expect(disposeCameras).toHaveBeenCalledOnce();
+  expect(disposeFeed).toHaveBeenCalledOnce();
   expect(scene.activeCamera.detachControl).toHaveBeenCalledOnce();
   expect(scene.dispose).toHaveBeenCalledOnce();
   expect(engine.dispose).toHaveBeenCalledOnce();
