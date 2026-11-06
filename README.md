@@ -54,3 +54,7 @@ Lire ces documents avant de poursuivre l'implémentation.
 ## En cas d'erreur de chargement d'un shader
 
 Après une mise à jour de l'outillage, recharger une fois la page (⌘⇧R sur Mac) pour abandonner les anciens modules déjà chargés dans l'onglet. Le statut « Prêt à explorer » attend désormais la préparation du rendu ; une erreur de chargement affiche un message explicite. Le correctif et ses tests sont décrits dans [la décision 0001](docs/decisions/0001-vite-cache-et-preparation-du-rendu.md).
+
+## Volet décors - préparation documentaire
+
+Les documents du futur éditeur de décors sont regroupés dans [docs/decors/](docs/decors/Decors.md) : [spécification](docs/decors/Decors.md), [instructions IA](docs/decors/AGENTS.md), [architecture proposée](docs/decors/ACHITECTURE.md) et [bonnes pratiques BabylonJS](docs/decors/BABYLONJS_BONNES_PRATIQUES.md). Leurs tâches sont distinctes de celles du laboratoire ; aucun code ni statut de validation existant n’est modifié par cet ajout.

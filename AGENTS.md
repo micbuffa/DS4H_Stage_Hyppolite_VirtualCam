@@ -38,3 +38,7 @@ Ce dépôt prépare un laboratoire pédagogique BabylonJS de réalisation de con
 ## Utilisation selon l'assistant
 
 Ce fichier `AGENTS.md` constitue le guide commun, avec la casse conventionnelle attendue notamment par Codex. `CLAUDE.md` et `GEMINI.md` y renvoient pour éviter de dupliquer les règles. Si un outil ne charge pas ces fichiers automatiquement, lui fournir explicitement les quatre documents ci-dessus dans son contexte.
+
+## Volet décors
+
+Pour une demande concernant l’éditeur de décors, lire aussi docs/decors/Decors.md et les documents associés. Ce volet documentaire possède son propre plan de tâches et ne remplace ni la spécification de caméras, ni l’architecture racine.
