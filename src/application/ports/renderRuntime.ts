@@ -1,5 +1,6 @@
 export interface RenderRuntime {
   start(): void;
+  whenReady(): Promise<void>;
   resize(pixelRatio: number): void;
   dispose(): void;
 }

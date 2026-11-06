@@ -1,6 +1,6 @@
 # Caméras virtuelles — spécification et tâches incrémentales
 
-Version : 1.1 — 6 novembre 2026. Statut : T00, T01 et T02 réalisées ; T03 est l’étape active du suivi, à implémenter ; T04 à T11 restent à réaliser. Documents associés : [instructions IA](AGENTS.md), [architecture](ARCHITECTURE.md), [bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md).
+Version : 1.2 — 6 novembre 2026. Statut : T00 à T03 réalisées ; T04 est l’étape active du suivi, à implémenter ; T05 à T11 restent à réaliser. Documents associés : [instructions IA](AGENTS.md), [architecture](ARCHITECTURE.md), [bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md).
 
 ## 1. Objectif pédagogique
 
@@ -143,7 +143,7 @@ Ne pas tester des pixels avec `NullEngine`. Les tests unitaires de gestion des f
 
 Les cases ne seront cochées qu'une fois les critères et tests satisfaits. Chaque étape doit laisser une application utilisable ; les fixtures provisoires nécessaires aux étapes initiales sont retirées quand leur remplacement est validé.
 
-Suivi : `[DONE]` indique une tâche terminée et validée ; `[CURRENT]` désigne l’étape active à traiter. T03 n’a pas encore été implémentée. Les tâches suivantes restent sans marqueur.
+Suivi : `[DONE]` indique une tâche terminée et validée ; `[CURRENT]` désigne l’étape active à traiter. T04 n’a pas encore été implémentée. Les tâches suivantes restent sans marqueur.
 
 ### T00 [DONE] — Préparer la documentation pour les assistants
 
@@ -171,16 +171,17 @@ Dépendance : T01. Créer plateau, structures, barrières, enceintes et les troi
 - **I** : racines, transformations et destruction des ensembles ; surfaces identifiées distinctement des cadres.
 - **B/M** : mire non inversée, bon côté visible et implantation lisible.
 
-### T03 [CURRENT] — Ajouter les musiciens et instruments
+### T03 [DONE] — Ajouter les musiciens et instruments
 
 Dépendance : T02. Quatre personnages, leurs instruments et accessoires procéduraux ; assembler chaque musicien dans son thème.
 
-- [ ] Critères : volumes reconnaissables, placés sur le plateau, batterie sur estrade, aucune dépendance à un téléchargement externe.
+- [x] Critères : volumes reconnaissables, placés sur le plateau, batterie sur estrade, aucune dépendance à un téléchargement externe.
+- Validation initiale : 71 tests unitaires/intégration et 12 tests navigateur. Après correction d’un cas révélé par l’essai utilisateur (cache Vite partagé et chargement asynchrone des shaders), la suite comprend 75 tests unitaires/intégration et 14 tests navigateur ; voir [compte rendu T03](docs/validation/T03.md).
 - **U** : descriptions des quatre rôles et leurs instruments ; validation des poses et calcul des ancrages locaux.
 - **I** : présence des groupes attendus, parentage correct et suppression complète d'un groupe.
 - **B/M** : reconnaissance des instruments et absence d'interpénétration majeure.
 
-### T04 — Créer les neuf caméras et leurs représentations
+### T04 [CURRENT] — Créer les neuf caméras et leurs représentations
 
 Dépendances : T03. Registre, préréglages, boîtiers, labels, sélection unique et retour à la vue régie ; sélection provisoire par clic sur boîtier avant le panneau T08.
 

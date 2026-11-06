@@ -4,6 +4,7 @@ import { Color4 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { createObserver } from '../cameras/createObserver';
+import { createBand } from '../models/musicians/createBand';
 import { createStage } from '../models/stage/createStage';
 import { createScreens } from '../models/screens/createScreens';
 import { stageLayout, screenLayout, validateConcertLayout } from '../../../domain/concert/concertLayout';
@@ -18,6 +19,7 @@ export function createObservationScene(engine: AbstractEngine): Scene {
     validateConcertLayout(stageLayout, screenLayout);
     createStage(scene, stageLayout);
     createScreens(scene, screenLayout);
+    createBand(scene, stageLayout);
     return scene;
   } catch (error) {
     scene.dispose();

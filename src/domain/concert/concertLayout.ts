@@ -28,3 +28,7 @@ export function validateConcertLayout(stage: StageDefinition, screens: readonly 
   }
   validateScreens(screens);
 }
+
+export function drumRiserLayout(stage: StageDefinition) {
+  return { width: 5, depth: 3, height: 0.6, centerZ: stage.centerZ + stage.depth / 2 - 2.5 };
+}

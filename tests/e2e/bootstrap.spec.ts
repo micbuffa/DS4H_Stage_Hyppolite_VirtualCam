@@ -11,7 +11,7 @@ test('renders WebGL2, orbits and resizes without console errors', async ({ page 
   await expect(canvas).toBeVisible();
   await expect(canvas).toBeFocused();
   await expect(canvas).toHaveScreenshot('stage-and-test-patterns.png', { maxDiffPixelRatio: 0.005 });
-  await page.screenshot({ path: 'test-results/t02-initial.png' });
+  await page.screenshot({ path: 'test-results/t03-initial.png' });
   const before = await canvas.screenshot();
   await page.mouse.move(650, 360);
   await page.mouse.down();
@@ -20,7 +20,7 @@ test('renders WebGL2, orbits and resizes without console errors', async ({ page 
   await expect(async () => { expect((await canvas.screenshot()).equals(before)).toBe(false); }).toPass();
   await page.setViewportSize({ width: 960, height: 600 });
   await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => [element.width, element.height])).toEqual([960, 600]);
-  await page.screenshot({ path: 'test-results/t02-orbit.png' });
+  await page.screenshot({ path: 'test-results/t03-orbit.png' });
   expect(errors).toEqual([]);
 });
 
@@ -40,7 +40,7 @@ for (const key of ['z', 'q', 's', 'd', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'Arr
   test(`translates the view using ${key}`, async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('status')).toContainText('Prêt à explorer');
-  await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle');
     const canvas = page.getByLabel('Vue 3D navigable du laboratoire');
     await canvas.focus();
     const before = await canvas.screenshot();
@@ -76,4 +76,16 @@ test('zooms with wheel and small two-finger trackpad-style deltas, without scrol
   await canvas.dispatchEvent('wheel', { deltaY: -60, deltaMode: 0, ctrlKey: true, bubbles: true, cancelable: true });
   await expect(async () => { expect((await canvas.screenshot()).equals(pinchBefore)).toBe(false); }).toPass();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test('shows the procedural band in a closer view', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.goto('/tests/e2e/fixtures/band.html');
+  await expect(page.locator('body')).toHaveAttribute('data-ready', 'true');
+  const canvas = page.getByLabel('Vue rapprochée du groupe');
+  await expect(canvas).toHaveScreenshot('band-close-up.png', { maxDiffPixelRatio: 0.005 });
+  await page.screenshot({ path: 'test-results/t03-band-close-up.png' });
+  expect(errors).toEqual([]);
 });

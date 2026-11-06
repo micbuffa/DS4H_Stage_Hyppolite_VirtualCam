@@ -13,6 +13,7 @@ const { engine, scene, detachKeyboard } = vi.hoisted(() => ({
   },
 }));
 vi.mock('../../src/infrastructure/babylon/interaction/attachObserverKeyboard', () => ({ attachObserverKeyboard: () => detachKeyboard }));
+vi.mock('../../src/infrastructure/babylon/engine/watchSceneReadiness', () => ({ watchSceneReadiness: () => ({ ready: Promise.resolve(), dispose: vi.fn() }) }));
 vi.mock('@babylonjs/core/Engines/engine', () => ({ Engine: class { constructor() { return engine; } } }));
 vi.mock('../../src/infrastructure/babylon/engine/createObservationScene', () => ({ createObservationScene: () => scene }));
 import { createBabylonRuntime } from '../../src/infrastructure/babylon/engine/createBabylonRuntime';

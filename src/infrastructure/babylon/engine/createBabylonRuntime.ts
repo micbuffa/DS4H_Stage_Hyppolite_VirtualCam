@@ -2,6 +2,7 @@ import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { attachObserverKeyboard } from '../interaction/attachObserverKeyboard';
 import { Engine } from '@babylonjs/core/Engines/engine';
 import type { RenderRuntime } from '../../../application/ports/renderRuntime';
+import { watchSceneReadiness } from './watchSceneReadiness';
 import { createObservationScene } from './createObservationScene';
 
 export function createBabylonRuntime(canvas: HTMLCanvasElement): RenderRuntime {
@@ -11,6 +12,7 @@ export function createBabylonRuntime(canvas: HTMLCanvasElement): RenderRuntime {
     const scene = createObservationScene(engine);
     scene.activeCamera?.attachControl(canvas, false);
     const detachKeyboard = attachObserverKeyboard(scene.activeCamera as ArcRotateCamera, canvas);
+    const readiness = watchSceneReadiness(scene);
     const render = () => scene.render();
     let disposed = false;
     let started = false;
@@ -20,6 +22,7 @@ export function createBabylonRuntime(canvas: HTMLCanvasElement): RenderRuntime {
         started = true;
         engine.runRenderLoop(render);
       },
+      whenReady: () => readiness.ready,
       resize(pixelRatio) {
         if (disposed) return;
         engine.setHardwareScalingLevel(1 / pixelRatio);
@@ -28,6 +31,7 @@ export function createBabylonRuntime(canvas: HTMLCanvasElement): RenderRuntime {
       dispose() {
         if (disposed) return;
         disposed = true;
+        readiness.dispose();
         engine.stopRenderLoop(render);
         detachKeyboard();
         scene.activeCamera?.detachControl();

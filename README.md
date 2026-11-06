@@ -2,7 +2,7 @@
 
 Laboratoire pédagogique BabylonJS : positionner neuf caméras virtuelles et réaliser la retransmission d'un concert sur trois écrans 3D.
 
-T01 et T02 sont implémentées : caméra d'observation, plateau de concert, toit et treillis, enceintes, barrières et trois écrans 16:9 avec mires. Les musiciens et instruments arriveront à T03 ; les flux de caméras seront ajoutés à T05/T06.
+T01 à T03 sont implémentées : caméra d'observation, plateau de concert, structures, enceintes, barrières, trois écrans 16:9 avec mires et quatre musiciens avec instruments 3D. Le chanteur est au centre, le guitariste à gauche, le bassiste à droite et le batteur sur l'estrade. Guitare, basse, batterie, micros et amplificateurs sont construits avec des primitives locales. Les caméras de captation arriveront à T04 ; les flux seront ajoutés à T05/T06.
 
 ## Démarrer
 
@@ -23,7 +23,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-`check` lance TypeScript strict, ESLint, les tests unitaires/intégration puis le build. Les tests navigateur démarrent leur propre serveur sur le port 5187, qui doit être libre, et utilisent Chromium avec WebGL2 logiciel. Ils ne réutilisent pas un serveur existant. La référence visuelle actuelle est celle de macOS/Chromium. Sur une autre plateforme, créer puis examiner sa référence avec `npm run test:e2e -- --grep 'renders WebGL2' --update-snapshots` ; ne pas renouveler les captures sans contrôle du rendu.
+`check` lance TypeScript strict, ESLint, les tests unitaires/intégration puis le build. Les tests navigateur démarrent leur propre serveur sur le port 5187, qui doit être libre, et utilisent Chromium avec WebGL2 logiciel. Ils ne réutilisent pas un serveur existant. Le mode `e2e` sépare leur cache Vite (`node_modules/.vite-e2e`) de celui du serveur interactif (`node_modules/.vite-dev`), pour garder les shaders disponibles pendant les tests. La référence visuelle actuelle est celle de macOS/Chromium. Sur une autre plateforme, créer puis examiner sa référence avec `npm run test:e2e -- --grep 'renders WebGL2' --update-snapshots` ; ne pas renouveler les captures sans contrôle du rendu.
 
 Pour isoler le téléchargement du navigateur comme dans cet environnement :
 
@@ -42,5 +42,10 @@ PLAYWRIGHT_BROWSERS_PATH=/private/tmp/virtual-cameras-playwright npm run test:e2
 - [Bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md)
 - [Validation et limites de T01](docs/validation/T01.md)
 - [Validation de T02 et des déplacements](docs/validation/T02.md)
+- [Validation de T03 : musiciens et instruments](docs/validation/T03.md)
 
 Lire ces documents avant de poursuivre l'implémentation.
+
+## En cas d'erreur de chargement d'un shader
+
+Après une mise à jour de l'outillage, recharger une fois la page (⌘⇧R sur Mac) pour abandonner les anciens modules déjà chargés dans l'onglet. Le statut « Prêt à explorer » attend désormais la préparation du rendu ; une erreur de chargement affiche un message explicite. Le correctif et ses tests sont décrits dans [la décision 0001](docs/decisions/0001-vite-cache-et-preparation-du-rendu.md).

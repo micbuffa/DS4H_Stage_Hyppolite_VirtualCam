@@ -110,3 +110,19 @@ Conserver le socle sans backend. La sauvegarde locale, les déplacements automat
 Les dimensions et emplacements sont regroupés dans `src/domain/concert/concertLayout.ts`, les contraintes des écrans dans `src/domain/screens/screenDefinition.ts`. Les groupes `models/stage` et `models/screens` construisent et libèrent leurs ressources ; `models/modelGroup.ts` porte leur propriété commune. Les surfaces vidéo ont la catégorie `video-surface`, distincte des cadres `concert`, pour préparer les exclusions des futurs flux.
 
 La translation ZQSD/flèches sépare le calcul pur (`domain/cameras/observerMovement.ts`) de l'adaptateur d'événements et d'animation (`infrastructure/babylon/interaction/attachObserverKeyboard.ts`). Le clavier orbital BabylonJS est retiré afin d'éviter deux actions sur les flèches. La molette et les événements de trackpad restent gérés par le contrôle BabylonJS existant. La grille temporaire de T01 a été retirée.
+
+## Mise en place à T03
+
+`domain/concert/bandLayout.ts` décrit les quatre rôles, leurs instruments, leurs poses et les ancrages locaux. Les poses sont validées sur le plateau ou l'estrade ; les coordonnées monde peuvent être calculées sans BabylonJS. La description de l'estrade est partagée avec la factory de scène pour éviter des hauteurs divergentes.
+
+`models/musicians/createBand.ts` assemble quatre groupes indépendants construits par `createMusician.ts`. Chaque groupe possède ses matériaux, son personnage et les instruments qui lui sont parentés. Les factories de guitare/basse, batterie, micro et amplificateur vivent dans `models/instruments/` et reçoivent les matériaux du propriétaire. Elles ne détruisent pas les matériaux partagés au sein du musicien. Supprimer un musicien supprime tous ses éléments ; supprimer le groupe libère les quatre propriétaires de façon idempotente.
+
+`models/modelGeometry.ts` regroupe les primitives utilisées par ces modèles, en conservant leur catégorie filmable et leur thème. Aucun mesh musical n'intercepte le picking. Les poses sont statiques à T03 ; l'animation reste prévue à T10.
+
+Une fixture navigateur dans `tests/e2e/fixtures/` utilise la scène de production avec un cadrage fixe pour la recette rapprochée, sans interface de diagnostic ni globale ajoutée à l'application. Elle ne constitue pas une entrée du build de production.
+
+## Préparation asynchrone et serveurs de développement
+
+Le port `RenderRuntime` expose `whenReady(): Promise<void>`. La composition renvoie cette disponibilité via `app.ready`, libère le runtime en cas d'échec et conserve la cause technique. Le point d'entrée traite l'erreur et ne présente le statut prêt qu'après une image complète. `watchSceneReadiness.ts` possède les observateurs de démarrage et les retire à la résolution, au rejet ou au démontage.
+
+Les caches Vite du développement, des unitaires et des tests navigateur sont distincts. Voir [la décision 0001](docs/decisions/0001-vite-cache-et-preparation-du-rendu.md) pour le défaut observé, les choix et le scénario de non-régression à deux serveurs.

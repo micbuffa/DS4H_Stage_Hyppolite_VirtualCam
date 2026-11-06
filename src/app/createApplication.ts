@@ -6,7 +6,7 @@ export function createApplication(
   createRuntime: () => RenderRuntime,
   host: ApplicationHost,
   config: AppConfig = defaultConfig,
-): { dispose(): void } {
+): { dispose(): void; ready: Promise<void> } {
   validateConfig(config);
   const cleanup: Array<() => void> = [];
   let runtime: RenderRuntime | undefined;
@@ -30,7 +30,11 @@ export function createApplication(
     cleanup.push(host.subscribeExit(dispose));
     resize();
     runtime.start();
-    return { dispose };
+    const ready = runtime.whenReady().catch((cause: unknown) => {
+      dispose();
+      throw new Error('Impossible de préparer le rendu 3D. Rechargez la page (⌘⇧R sur Mac).', { cause });
+    });
+    return { dispose, ready };
   } catch (cause) {
     dispose();
     throw new Error('Impossible de démarrer la vue 3D. Vérifiez que WebGL2 est disponible dans votre navigateur.', { cause });

@@ -6,6 +6,8 @@ Ce document guide la future implémentation. Les API citées sont des pistes vé
 
 - Employer les modules npm `@babylonjs/core` et `@babylonjs/gui` avec versions compatibles et fichier de verrouillage. Ajouter les loaders uniquement si des assets importés le nécessitent.
 - Vérifier les imports nécessaires aux enregistrements et effets de bord pour la version choisie ; ne pas appliquer aveuglément une recette de tree shaking d'une autre version.
+- Garder des caches Vite distincts pour le serveur interactif et les tests : les imports dynamiques des shaders ne doivent pas pointer vers des chunks supprimés par un autre prébundling.
+- Ne déclarer le rendu prêt qu’après la préparation des shaders et une image complète ; gérer également les erreurs asynchrones de compilation et nettoyer les observateurs temporaires.
 - Utiliser un seul moteur, une scène principale et une boucle de rendu. Brancher le redimensionnement, le ratio de pixels plafonné et l'arrêt dès le démarrage.
 - Garder l'inspecteur et les diagnostics optionnels en développement ; ne pas les inclure systématiquement au démarrage.
 

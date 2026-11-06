@@ -1,5 +1,6 @@
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Scene } from '@babylonjs/core/scene';
+import { drumRiserLayout } from '../../../../domain/concert/concertLayout';
 import type { StageDefinition } from '../../../../domain/concert/concertLayout';
 import { createModelGroup } from '../modelGroup';
 import { stageGeometry } from './stageGeometry';
@@ -44,7 +45,8 @@ export function createStage(scene: Scene, layout: StageDefinition) {
   for (let i = 0; i < 4; i++) {
     box(`stage-step-${i}`, [2, height * (i + 1) / 4, 0.5], [-width / 2 + 2, height * (i + 1) / 8, frontZ - 1.75 + i * 0.5], deck);
   }
-  box('drum-riser', [5, 0.6, 3], [0, height + 0.3, backZ - 2.5], deck);
+  const riser = drumRiserLayout(layout);
+  box('drum-riser', [riser.width, riser.height, riser.depth], [0, height + riser.height / 2, riser.centerZ], deck);
 
   for (const sign of [-1, 1]) {
     const x = sign * (width / 2 - 1);

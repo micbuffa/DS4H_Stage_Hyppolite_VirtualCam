@@ -6,7 +6,7 @@ import type { ApplicationHost } from '../../src/application/ports/renderRuntime'
 function setup() {
   const resizeListeners = new Set<() => void>();
   const exitListeners = new Set<() => void>();
-  const runtime = { start: vi.fn(), resize: vi.fn(), dispose: vi.fn() };
+  const runtime = { start: vi.fn(), whenReady: vi.fn().mockResolvedValue(undefined), resize: vi.fn(), dispose: vi.fn() };
   const host: ApplicationHost = {
     pixelRatio: () => 3,
     subscribeResize(callback) { resizeListeners.add(callback); return () => { resizeListeners.delete(callback); }; },
@@ -70,4 +70,18 @@ describe('application lifecycle', () => {
   it.each([[NaN, 1], [0, 1], [1.25, 1.25], [3, 1.5]])('normalizes device ratio %s', (input, expected) => {
     expect(effectivePixelRatio(input, 1.5)).toBe(expected);
   });
+});
+
+it('waits for asynchronous rendering readiness and cleans up if shader loading fails', async () => {
+  const s = setup();
+  let rejectReady!: (error: Error) => void;
+  const pending = new Promise<void>((_, reject) => { rejectReady = reject; });
+  s.runtime.whenReady.mockReturnValue(pending);
+  const app = createApplication(() => s.runtime, s.host);
+  const cause = new Error('Failed to fetch dynamically imported shader');
+  const result = expect(app.ready).rejects.toThrow(expect.objectContaining({ cause, message: expect.stringContaining('préparer le rendu') }));
+  rejectReady(cause);
+  await result;
+  expect(s.runtime.dispose).toHaveBeenCalledOnce();
+  expect(s.resizeListeners.size + s.exitListeners.size).toBe(0);
 });
