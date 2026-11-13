@@ -150,3 +150,9 @@ La route est fixe C1 → écran 1 à cette étape. Le partage entre consommateur
 `FeedRouter` possède les flux via des ports génériques, sans dépendance BabylonJS. La préparation réutilise les sources existantes ; la validation remplace toutes les textures dans une opération synchrone, attend leur présentation puis libère les sources sans consommateur. Le rollback restaure les textures et les sources suspendues. L'adaptateur `createRoutingRenderer` fournit les ports de matériaux, les mires « SANS SIGNAL » et les factories natives. L'interface `ui/attachRoutingControls.ts` traduit les gestes HTML en commandes et reflète l'état validé ; elle ne possède aucun flux.
 
 Pour conserver au plus trois passes vidéo actives pendant une coupe depuis trois sources, un ancien flux devenu inutile dans la prochaine table peut être suspendu. Sa dernière image reste lisible jusqu'au remplacement ; sa texture est libérée après présentation. La commande publique ajoute au maximum une nouvelle source et peut donc conserver temporairement quatre textures allouées, avec au plus trois rendues. Voir [la décision 0004](docs/decisions/0004-routage-transactionnel.md).
+
+## Expérimentation décors - entrée séparée
+La page decors.html utilise src/decors.ts et src/app/createDecorEditor.ts.
+Les données pures vivent dans domain/decors ; le contrat de rendu dans application/ports/decorRenderer.ts ; le runtime et les modèles dans infrastructure/babylon ; le stockage dans infrastructure/persistence/decorStorage.ts.
+Le JSON du prototype est distinct du graphe WAM. Le panneau HTML de l’atelier ne remplace pas la régie 3D des caméras.
+Voir docs/decisions/0005-atelier-decors-experimental.md et docs/decors/VALIDATION_PROTOTYPE.md.

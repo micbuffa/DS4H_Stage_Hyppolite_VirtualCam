@@ -58,3 +58,23 @@ Après une mise à jour de l'outillage, recharger une fois la page (⌘⇧R sur 
 ## Volet décors - préparation documentaire
 
 Les documents du futur éditeur de décors sont regroupés dans [docs/decors/](docs/decors/Decors.md) : [spécification](docs/decors/Decors.md), [instructions IA](docs/decors/AGENTS.md), [architecture proposée](docs/decors/ACHITECTURE.md) et [bonnes pratiques BabylonJS](docs/decors/BABYLONJS_BONNES_PRATIQUES.md). Leurs tâches sont distinctes de celles du laboratoire ; aucun code ni statut de validation existant n’est modifié par cet ajout.
+
+## Atelier de décors - prototype Aya
+Après démarrage du serveur Vite, ouvrir /decors.html. Cette page est indépendante du laboratoire de caméras.
+Configurations, catalogue, gizmos, valeurs numériques, couleurs, spots RGB, public statique, sauvegarde locale explicite et export/import du JSON du prototype.
+Intégration WAM JAM Party et performances casque non validées.
+Voir [le parcours de démonstration](docs/decors/POINT_PROF.md), [l’étude](docs/decors/ETUDE_EXISTANT.md) et [la décision 0005](docs/decisions/0005-atelier-decors-experimental.md).
+Tests dédiés : npx playwright test --config playwright.decors.config.ts (Google Chrome installé requis).
+
+## Dossier de présentation d’Aya
+Le prototype, les tests et le dossier illustré sont rassemblés sur la branche aya-scene-et-decore.
+- [Rapport illustré](docs/presentation-aya/Rapport_Aya_Decors_Concert_Virtuel.pdf)
+- [Synthèse de deux pages](docs/presentation-aya/Synthese_avancement_Aya_2pages.pdf)
+- [Démonstration guidée hors ligne](docs/presentation-aya/Demonstration_guidee_Aya.html) : télécharger le fichier HTML puis l’ouvrir dans un navigateur.
+- [Instructions de lancement](docs/presentation-aya/LIRE_AVANT_LA_PRESENTATION.md)
+- [Trame orale](docs/presentation-aya/Trame_orale_Aya.md)
+
+Pour manipuler les décors : npm ci, npm run dev, puis ouvrir /decors.html à l’adresse indiquée par Vite.
+Le dossier de présentation contient également une version construite et un lanceur local nécessitant Node.js.
+La publication des fichiers sur GitHub ne déploie pas automatiquement une application web.
+Les rapports constituent un état d’avancement daté : leur mention du blocage Git décrit la situation avant cette publication.

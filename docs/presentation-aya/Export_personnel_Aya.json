@@ -1,0 +1,360 @@
+{
+  "format": "aya-decors",
+  "version": 1,
+  "preset": "festival",
+  "floor": "dark",
+  "objects": [
+    {
+      "id": "screen-0",
+      "kind": "screen",
+      "position": [
+        -17,
+        7,
+        10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "screen-1",
+      "kind": "screen",
+      "position": [
+        17,
+        7,
+        10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "screen-2",
+      "kind": "screen",
+      "position": [
+        0,
+        7,
+        15.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "lamp-0",
+      "kind": "lamp",
+      "position": [
+        -6,
+        9.5,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#ff4066",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "lamp-1",
+      "kind": "lamp",
+      "position": [
+        0,
+        9.5,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#48ed9d",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "lamp-2",
+      "kind": "lamp",
+      "position": [
+        6,
+        9.5,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#498aff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "976e4ba8-1220-4e29-8783-5eddc985351d",
+      "kind": "speaker",
+      "position": [
+        -9.920226097106934,
+        1.2047317028045654,
+        10.427133560180664
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#536476",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "fb7ab550-03b7-4ef5-91e2-d7b45481bb9f",
+      "kind": "screen",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "52af1a97-d168-4c87-853a-e1187c85e96e",
+      "kind": "lamp",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#ff4066",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "5c228d82-4c89-4d44-9381-5abaa90f9a7a",
+      "kind": "lamp",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#ff4066",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "bdfd127e-5f2f-46f9-8b7d-2e5ab8a4a619",
+      "kind": "lamp",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#ff4066",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "602f3cd9-a91b-455c-8bfe-e270204908c7",
+      "kind": "lamp",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#ff4066",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "b2f86fce-1130-46ea-8f32-cea003e0dd03",
+      "kind": "tower",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#536476",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "4a4b66d7-ad02-4a11-9b08-753f6dce2cc4",
+      "kind": "tower",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#536476",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "5f721406-364a-4c08-8c45-984dcaf78780",
+      "kind": "stairs",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#536476",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "1db7beb6-563d-4805-a8df-7eaceb93113f",
+      "kind": "booth",
+      "position": [
+        0,
+        1.5,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#536476",
+      "intensity": 3,
+      "beam": true
+    }
+  ]
+}

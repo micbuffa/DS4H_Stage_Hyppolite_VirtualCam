@@ -1,0 +1,162 @@
+{
+  "format": "aya-decors",
+  "version": 1,
+  "preset": "festival",
+  "floor": "dark",
+  "objects": [
+    {
+      "id": "screen-0",
+      "kind": "screen",
+      "position": [
+        -17,
+        7,
+        10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "screen-1",
+      "kind": "screen",
+      "position": [
+        17,
+        7,
+        10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "screen-2",
+      "kind": "screen",
+      "position": [
+        0,
+        7,
+        15.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#865bff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "lamp-0",
+      "kind": "lamp",
+      "position": [
+        -6,
+        9.5,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#ff4066",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "lamp-1",
+      "kind": "lamp",
+      "position": [
+        0,
+        9.5,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#48ed9d",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "lamp-2",
+      "kind": "lamp",
+      "position": [
+        6,
+        9.5,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#498aff",
+      "intensity": 3,
+      "beam": true
+    },
+    {
+      "id": "c0df2cbe-ce16-48ff-b2f5-406402fc7c74",
+      "kind": "booth",
+      "position": [
+        6,
+        0,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "color": "#df9b55",
+      "intensity": 3,
+      "beam": true
+    }
+  ]
+}

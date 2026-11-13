@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Atelier décors · Aya</title></head>
+<body><div id="decor-app">
+<header><div><span class="eyebrow">WAM JAM PARTY · EXPÉRIMENTATION</span><h1>Atelier décors<span> / Aya</span></h1></div><nav><a href="/">Laboratoire caméras ↗</a><button id="restore">Restaurer</button><button id="save" class="primary">Enregistrer</button></nav></header>
+<main>
+<aside class="library"><span class="eyebrow">01 / COMPOSER</span><h2>Votre scène de concert</h2><p class="muted">Un premier atelier pour assembler des décors légers dans le navigateur.</p>
+<label>Configuration<select id="preset"><option value="festival">Festival · 3 écrans</option><option value="compact">Compacte · 1 écran</option></select></label>
+<label>Finition du plateau<select id="floor"><option value="dark">Anthracite</option><option value="wood">Bois · teinte unie</option></select></label>
+<h3>Ajouter un élément</h3><div class="catalog">
+<button data-add="screen"><b>▣</b> Écran</button><button data-add="speaker"><b>◉</b> Enceinte</button><button data-add="tower"><b>╳</b> Pylône</button><button data-add="lamp"><b>✦</b> Spot</button><button data-add="stairs"><b>≋</b> Escalier</button><button data-add="booth"><b>▤</b> Cabine régie</button>
+</div>
+<div class="list-heading"><h3>Éléments modifiables</h3><small id="count"></small></div><select id="objects" size="8" aria-label="Éléments modifiables"></select>
+<div class="note"><b>Prototype local</b><p>Modèles procéduraux. L’export vers WAM JAM Party et les performances sur casque restent à valider.</p></div>
+</aside>
+<section class="viewport"><div class="toolbar"><div role="group" aria-label="Outil de manipulation"><button data-tool="move" aria-pressed="true">Déplacer</button><button data-tool="rotate" aria-pressed="false">Tourner</button><button data-tool="scale" aria-pressed="false">Échelle</button><button data-tool="none" aria-pressed="false">Observer</button></div><button id="view">Vue d’ensemble</button></div>
+<div class="canvas-wrap"><canvas id="decor-canvas" aria-label="Scène de concert 3D" tabindex="0"></canvas><div class="scene-tag"><i></i> BABYLON.JS <span>LOW-POLY / BUREAU</span></div><div class="canvas-help">Glisser : orbiter · Molette : zoomer · Flèches colorées : déplacer · Échap : annuler</div></div>
+<p id="decor-status" role="status">Préparation de la scène…</p></section>
+<aside class="inspector"><span class="eyebrow">02 / PERSONNALISER</span><h2 id="selection-name">Aucun décor sélectionné</h2><p class="muted">Sélectionnez un objet dans la vue ou dans la liste de gauche.</p>
+<fieldset id="properties" disabled><legend>Propriétés du décor</legend>
+<h3>Position <small>mètres</small></h3><div class="triplet"><label>X<input id="position0" type="number" step="0.25" min="-100" max="100"></label><label>Y<input id="position1" type="number" step="0.25" min="-100" max="100"></label><label>Z<input id="position2" type="number" step="0.25" min="-100" max="100"></label></div>
+<h3>Rotation <small>degrés</small></h3><div class="triplet"><label>X<input id="rotation0" type="number" step="5"></label><label>Y<input id="rotation1" type="number" step="5"></label><label>Z<input id="rotation2" type="number" step="5"></label></div>
+<h3>Échelle</h3><div class="triplet"><label>X<input id="scale0" type="number" step="0.1" min="0.1" max="5"></label><label>Y<input id="scale1" type="number" step="0.1" min="0.1" max="5"></label><label>Z<input id="scale2" type="number" step="0.1" min="0.1" max="5"></label></div>
+<label class="color-row">Couleur<input id="color" type="color" value="#865bff"></label>
+<div id="light-controls" hidden><label>Puissance du spot<input id="intensity" type="range" min="0" max="10" step="0.1"></label><label class="check"><input id="beam" type="checkbox" checked> Afficher le faisceau</label><p class="muted">Le cône visible est une représentation légère. Le spot éclaire les surfaces.</p></div>
+</fieldset><div class="actions"><button id="duplicate" disabled>Dupliquer</button><button id="delete" disabled>Supprimer</button></div>
+<div class="export-box"><span class="eyebrow">03 / CONSERVER</span><h3>Emporter la création</h3><p class="muted">JSON versionné du prototype, réimportable dans cet atelier.</p><button id="export">Exporter le JSON ↓</button><label class="file-label">Importer un JSON<input id="import" type="file" accept=".json,application/json"></label></div>
+</aside></main><footer>Création de décors pour concert virtuel <span>Expérimentation Aya · Branche aya-scene-et-decore</span></footer></div><script type="module" src="/src/decors.ts"></script></body></html>

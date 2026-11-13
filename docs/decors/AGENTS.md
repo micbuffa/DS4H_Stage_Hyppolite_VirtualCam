@@ -1,11 +1,11 @@
 # Instructions pour les assistants IA - documentation décors
 
-Portée : ce dossier documentaire uniquement. Les instructions racine restent applicables. Les chemins cités ci-dessous sont relatifs à ce dossier. L’interdiction de coder décrit cette livraison, sans révoquer le mandat existant du laboratoire.
+Portée : ce dossier documentaire uniquement. Les instructions racine restent applicables. Les chemins cités ci-dessous sont relatifs à ce dossier. Le travail expérimental sur les décors ne modifie pas le mandat existant du laboratoire.
 
 ## Mission et état actuel
 Projet : éditeur web de décors low-poly BabylonJS pour WAM JAM Party.
 Lire Decors.md, ACHITECTURE.md et BABYLONJS_BONNES_PRATIQUES.md.
-La mission actuelle est documentaire : ne pas implémenter de fonctionnalité sans demande ultérieure.
+Aya a autorisé une première implémentation le 12 novembre 2026. Le prototype indépendant est décrit dans POINT_PROF.md ; ne pas annoncer l’intégration WAM ou la validation casque comme réalisées.
 Ne pas affirmer avoir lu les pièces jointes absentes, regardé les vidéos ou testé la VR.
 
 ## Avant toute future modification

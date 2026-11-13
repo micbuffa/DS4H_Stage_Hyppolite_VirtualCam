@@ -1,7 +1,7 @@
 # Spécification - Éditeur de décors 3D pour WAM JAM Party
 
 ## Statut et périmètre
-Document de conception. Aucun développement ni test exécutable n’a été réalisé dans cette livraison.
+Spécification et suivi. Premier prototype de bureau autorisé par Aya le 12 novembre 2026, en cours de validation. Voir POINT_PROF.md et la décision 0005 ; les étapes détaillées ci-dessous ne sont pas toutes accomplies.
 Objectif : un éditeur web spécialisé BabylonJS pour assembler, positionner, redimensionner et texturer des décors low-poly destinés à WAM JAM Party.
 Le premier livrable est une expérimentation sur ordinateur ; la scène exportée devra ensuite être évaluée dans le navigateur d’un Meta Quest 3.
 Ce projet ne vise pas à remplacer Blender, ni à développer un moteur audio ou une nouvelle plateforme collaborative.
@@ -13,7 +13,7 @@ Ce projet ne vise pas à remplacer Blender, ni à développer un moteur audio ou
   Ce dépôt héberge un laboratoire de caméras virtuelles. Son README décrit T01 à T06 comme implémentées ; ces validations antérieures n’ont pas été réexécutées ici. Cette spécification de décors est ajoutée sur aya-scene-et-decore ; l’intégration avec l’éditeur WAM reste à confirmer.
 - Article à lire : https://insa-lyon.hal.science/hal-05627990/
 - Vidéo à regarder : https://www.youtube.com/watch?v=6dYesOW6qhc&list=PLNUy77gRLMkw&index=2
-- Les articles annoncés en pièces jointes ne sont pas disponibles ici.
+- Deux articles transmis par Aya ont été consultés ; les vidéos et Ten years of Web Audio Modules restent à étudier.
 Le README de l’éditeur décrit des interfaces 3D WAM et un export JSON. Cela ne prouve pas que cet export accepte déjà des mondes complets.
 L’intégration WAM JAM Party et le rôle du logiciel appelé « 3DCoder » dans les échanges doivent être clarifiés.
 
@@ -27,9 +27,9 @@ Les tâches T0 à T10 ci-dessous appartiennent au volet décors, distinct des t�
 ## Convention de validation
 Chaque fonctionnalité future comprend ses tests unitaires, écrits lors de son implémentation, avant son passage à « terminé ».
 Les tests unitaires ne valident pas seuls un rendu visuel, un geste souris réel ou les performances d’un casque : prévoir aussi les contrôles d’intégration et manuels indiqués.
-Aucune tâche de développement ci-dessous n’est déclarée terminée.
+Les étapes complètes ci-dessous ne sont pas déclarées terminées. Le prototype en couvre un sous-ensemble ; voir VALIDATION_PROTOTYPE.md.
 
-## T0 - Comprendre et établir la référence
+## T0 [CURRENT] - Comprendre et établir la référence
 Actions : lire les articles, regarder les vidéos, tester la démonstration ; relever les entrées/sorties WAM ; identifier le dépôt de développement et celui d’intégration ; inventorier les scripts et versions existants.
 Livrable : notes d’expérimentation, procédure de lancement vérifiée et exemple réel de chargement/export.
 Critères : chaque dépôt a un rôle confirmé ; le comportement de référence et les erreurs observées sont consignés.
