@@ -9,22 +9,24 @@
   </head>
   <body>
     <main>
-      <header><span class="eyebrow">DS4H · LABORATOIRE BABYLONJS</span><h1>Caméras virtuelles</h1><p>T06 — Régie multiécran</p></header>
+      <header><span class="eyebrow">DS4H · LABORATOIRE BABYLONJS</span><h1>Caméras virtuelles</h1><p>Concert virtuel · Régie 3D</p></header>
       <canvas id="renderCanvas" aria-label="Vue 3D navigable du laboratoire" tabindex="0"></canvas>
-      <aside aria-label="Aide à la navigation"><strong id="selected-camera">Caméra sélectionnée : C1</strong><p>ZQSD / Flèches : déplacement · Glisser : orbite</p><p class="muted">Molette / défilement à deux doigts : zoom · Clic droit + glisser : déplacement</p><p class="muted">Cliquer sur un boîtier ou son label C1…C9 pour sélectionner. Frustum indicatif : 5 m · 16:9.</p><nav aria-label="Commandes caméra"><button id="home-view" type="button">Vue régie (R)</button><button id="camera-aids" type="button" aria-pressed="true">Masquer les aides (H)</button><button id="reset-camera" type="button">Réinitialiser C1</button></nav><p class="muted" id="feed-status">Préparation des écrans…</p></aside>
-      <section id="routing-panel" aria-label="Régie" class="routing-panel">
-        <h2>Régie</h2>
-        <label for="routing-camera" class="visually-hidden">Caméra à diffuser</label>
-        <select id="routing-camera" aria-label="Caméra à diffuser"></select>
-        <p class="muted">Écrans cibles</p>
-        <div class="target-buttons">
-          <button id="target-1" type="button" aria-pressed="true">1 · Gauche</button>
-          <button id="target-2" type="button" aria-pressed="false">2 · Droite</button>
-          <button id="target-3" type="button" aria-pressed="false">3 · Centre</button>
-        </div>
-        <div class="routing-actions"><button id="all-screens" type="button">Tous les écrans</button><button id="broadcast" type="button" disabled>DIFFUSER</button></div>
-        <div class="routing-table" aria-live="polite"><p id="route-1">Écran 1 ← Sans signal</p><p id="route-2">Écran 2 ← Sans signal</p><p id="route-3">Écran 3 ← Sans signal</p></div>
-        <p id="routing-message" aria-live="polite">Préparation…</p>
+      <aside aria-label="État de la régie">
+        <strong id="selected-camera">Sélection : C1</strong>
+        <div class="visually-hidden" aria-live="polite"><p id="route-1"></p><p id="route-2"></p><p id="route-3"></p></div><p class="muted" id="feed-status">Préparation des écrans…</p>
+        <p id="panel-message" aria-live="polite">Préparation…</p>
+        <nav aria-label="Navigation et aide"><button id="home-view" type="button">Vue régie (R)</button><button id="show-help" type="button">Aide</button></nav>
+      </aside>
+      <section id="help-text" class="help-text" aria-label="Aide du laboratoire" hidden>
+        <h2>Réaliser le concert</h2>
+        <p>Choisir une caméra par son boîtier ou le panneau. La sélection seule conserve le direct.</p>
+        <p>Cocher les écrans cibles puis DIFFUSER. ✓ = cible ; SÉLECTION = caméra choisie ; EN DIFFUSION = source à l’antenne.</p>
+        <p>DÉPLACER : axes/plans monde. ORIENTER : anneaux locaux. Relâcher valide, Échap annule le geste ou quitte l’outil. Le FOV vertical varie de 20° à 90°.</p>
+        <p>ZQSD / flèches : déplacement · Glisser : orbite · Molette / deux doigts : zoom · Clic droit : déplacer la vue.</p>
+        <p>R : retrouver la régie · H : afficher/masquer le frustum. Une caméra peut traverser le décor. PAUSE fige le concert. Les caméras et les écrans restent utilisables.</p>
+        <label for="feed-quality">Qualité vidéo</label>
+        <select id="feed-quality"><option value="standard">Standard · 1024 × 576</option><option value="reduced">Réduite · 512 × 288</option></select>
+        <p id="quality-status" aria-live="polite"></p>
       </section>
       <p id="status" role="status">Initialisation de WebGL2…</p>
     </main>

@@ -17,6 +17,7 @@ export function assertCameraId(id: number): asserts id is CameraId {
 
 export function validateCamera(definition: CameraDefinition): void {
   assertCameraId(definition.id);
+  if (definition.pose.position.length !== 3 || definition.pose.rotation.length !== 4) throw new Error('Pose caméra incomplète.');
   const { position: [x, y, z], rotation } = definition.pose;
   if (!definition.name.trim() || ![x, y, z, ...rotation, definition.fovDegrees, definition.near, definition.far].every(Number.isFinite)) throw new Error('Paramètres de caméra invalides.');
   if (x < -35 || x > 35 || y < 0.5 || y > 25 || z < -35 || z > 25) throw new Error('Position caméra hors limites.');

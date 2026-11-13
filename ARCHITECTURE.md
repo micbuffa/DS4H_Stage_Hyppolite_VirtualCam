@@ -150,3 +150,31 @@ La route est fixe C1 → écran 1 à cette étape. Le partage entre consommateur
 `FeedRouter` possède les flux via des ports génériques, sans dépendance BabylonJS. La préparation réutilise les sources existantes ; la validation remplace toutes les textures dans une opération synchrone, attend leur présentation puis libère les sources sans consommateur. Le rollback restaure les textures et les sources suspendues. L'adaptateur `createRoutingRenderer` fournit les ports de matériaux, les mires « SANS SIGNAL » et les factories natives. L'interface `ui/attachRoutingControls.ts` traduit les gestes HTML en commandes et reflète l'état validé ; elle ne possède aucun flux.
 
 Pour conserver au plus trois passes vidéo actives pendant une coupe depuis trois sources, un ancien flux devenu inutile dans la prochaine table peut être suspendu. Sa dernière image reste lisible jusqu'au remplacement ; sa texture est libérée après présentation. La commande publique ajoute au maximum une nouvelle source et peut donc conserver temporairement quatre textures allouées, avec au plus trois rendues. Voir [la décision 0004](docs/decisions/0004-routage-transactionnel.md).
+
+## Mise en place à T07
+
+`domain/cameras/cameraEditing.ts` contient les conversions angulaires, l'écrêtage des positions/FOV et la visée. `CameraRegistry.updateCamera` valide et copie une définition complète pour les changements d'objectif et la restauration exacte d'une transaction. L'application `CameraEditor` possède l'outil actif et la définition antérieure au geste ; elle applique les candidats validés en direct, valide au relâchement ou restaure après interruption. Elle ne modifie jamais le routage.
+
+`interaction/createCameraGizmos.ts` possède une couche utilitaire explicite et les gizmos natifs de position/rotation attachés au rig sélectionné. Translation monde, rotation locale, aucune mise à l'échelle. Les événements de glissement alimentent le port d'édition ; la couche ne se rend qu'avec l'observateur principal. `createEditingNavigation` suspend les entrées orbitales et annule l'inertie ; le clavier ZQSD possède en plus un prédicat d'autorisation. Le canvas garde son focus pendant cette suspension pour éviter le pointer-up synthétique produit par BabylonJS lors d'un blur.
+
+`ui/attachEditingControls.ts` possède les commandes HTML et interruptions : Échap, blur, document masqué, pointercancel et lostpointercapture. Les annulations de focus/pointeur sont écoutées en capture afin de restaurer la définition avant qu'un événement natif synthétique de relâchement puisse la valider. La destruction retire l'interface, annule le geste, libère gizmos/couche, puis détache les contrôles et détruit la scène. Voir [la décision 0005](docs/decisions/0005-edition-transactionnelle-et-entrees.md).
+
+## Mise en place à T08
+
+`domain/direction/panelLayout.ts` fixe la position du pupitre et la disposition de ses touches. `DirectorPanel` relie les commandes au registre des caméras, au directeur de diffusion et à l’éditeur. `directorPanelModel` projette leurs instantanés en libellés et états de touches. Les souscriptions sont retirées au démontage.
+
+`ui/createDirectorPanel.ts` possède le caisson, les touches et les textures de texte. Le panneau occupe le premier plan à droite. Ses maillages utilisent la couche d’observation et la catégorie `panel`, exclue des flux. Les libellés sont repeints lors d’un changement d’état ou de survol. `panelReadout.ts` répercute l’état et les erreurs dans le bandeau HTML, qui conserve l’accès à l’aide et au retour à la vue régie.
+
+`attachPanelPicking.ts` intercepte les appuis sur le pupitre après les gizmos et avant le picking des caméras. `PanelGesture` valide un seul clic si le pointeur est relâché sur la même touche sans glissement. La commande Pause est grisée jusqu’à T10.
+
+## Mise en place à T09
+
+`domain/concert/audienceLayout.ts` calcule les emplacements, l’orientation, la taille et le modèle de chaque spectateur à partir d’un effectif et d’une graine. La distribution réserve une allée centrale et le volume au sol du panneau. `createConcertScene` accepte cette configuration et utilise 144 spectateurs par défaut.
+
+`models/audience` construit six silhouettes colorées à partir de primitives fusionnées. Chaque spectateur est une instance d’une silhouette. Le groupe possède les géométries et un matériau partagé, ainsi que les instances qu’il peut déplacer individuellement à T10. Le marquage `concert` inclut le public dans les flux. Le picking ignore ses maillages.
+
+## Mise en place à T10 et T11
+
+`concertMotion.ts` calcule les trajectoires sur une horloge de spectacle indépendante du rendu. `attachConcertShow` applique les poses au groupe, au public et aux projecteurs. La pause est transmise par le pupitre et fige les poses du spectacle. L’adaptateur retire son observateur de scène et libère les lumières au démontage.
+
+Le changement de profil vidéo réemploie la transaction du routeur. Les nouvelles textures sont préparées avec la même table d’affectation. Le routeur suspend les anciens flux au besoin pour limiter à trois les passes vidéo actives, puis publie les textures prêtes en une seule opération. En cas d’échec, il réactive les anciens flux et conserve leurs textures.

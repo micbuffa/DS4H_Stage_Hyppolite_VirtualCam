@@ -1,0 +1,41 @@
+import { test, expect } from '@playwright/test';
+import { writeFile } from 'node:fs/promises';
+import { clickPanel } from './panelProjection';
+
+test('measures three live feeds with one hundred animated spectators', async ({ page, browser }, info) => {
+  test.skip(!process.env.CONCERT_BENCHMARK, 'Recette de performance à lancer seule.');
+  test.setTimeout(180_000);
+  await page.goto('/tests/e2e/fixtures/production.html');
+  await page.waitForLoadState('networkidle');
+  await page.bringToFront();
+  await page.evaluate(() => (window as unknown as { startConcert(): Promise<void> }).startConcert());
+  await clickPanel(page, 'camera-2');
+  await clickPanel(page, 'broadcast');
+  await expect(page.locator('#panel-message')).not.toContainText('Préparation');
+  await clickPanel(page, 'screen-1');
+  await clickPanel(page, 'screen-2');
+  await clickPanel(page, 'camera-5');
+  await clickPanel(page, 'broadcast');
+  await expect(page.locator('#panel-message')).not.toContainText('Préparation');
+  await clickPanel(page, 'screen-2');
+  await clickPanel(page, 'screen-3');
+  await clickPanel(page, 'camera-9');
+  await clickPanel(page, 'broadcast');
+  await expect(page.locator('#panel-message')).not.toContainText('Préparation');
+  const measure = () => page.evaluate(() => (window as unknown as { measureConcert(seconds: number): Promise<{ targets: { width: number; height: number }[] }> }).measureConcert(60));
+  await page.waitForTimeout(10000);
+  await page.screenshot({ path: info.outputPath('trois-sources.png') });
+  const standard = await measure();
+  expect(standard.targets).toEqual(Array(3).fill({ width: 1024, height: 576 }));
+  await page.locator('#feed-quality').evaluate((element: HTMLSelectElement) => {
+    element.value = 'reduced';
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await expect(page.locator('#quality-status')).toHaveText('Qualité vidéo appliquée.');
+  await page.waitForTimeout(10000);
+  const reduced = await measure();
+  expect(reduced.targets).toEqual(Array(3).fill({ width: 512, height: 288 }));
+  const report = JSON.stringify({ browserVersion: browser.version(), standard, reduced }, null, 2);
+  console.log(report);
+  await writeFile(info.outputPath('performance.json'), report);
+});

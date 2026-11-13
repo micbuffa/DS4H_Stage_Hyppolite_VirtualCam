@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickPanel } from './panelProjection';
 
 test('renders WebGL2, orbits and resizes without console errors', async ({ page }) => {
   const errors: string[] = [];
@@ -10,7 +11,9 @@ test('renders WebGL2, orbits and resizes without console errors', async ({ page 
   const canvas = page.getByLabel('Vue 3D navigable du laboratoire');
   await expect(canvas).toBeVisible();
   await expect(canvas).toBeFocused();
-  await expect(canvas).toHaveScreenshot('stage-and-test-patterns.png', { maxDiffPixelRatio: 0.005 });
+  await clickPanel(page, 'pause');
+  await expect(page.locator('#panel-message')).toContainText('Concert en pause');
+  // The paused instant depends on startup time. Fixed-pose visual baselines use the camera fixtures.
   await page.screenshot({ path: 'test-results/t05-initial.png' });
   const before = await canvas.screenshot();
   await page.mouse.move(650, 360);
@@ -43,6 +46,8 @@ for (const key of ['z', 'q', 's', 'd', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'Arr
     await page.waitForLoadState('networkidle');
     const canvas = page.getByLabel('Vue 3D navigable du laboratoire');
     await canvas.focus();
+    await clickPanel(page, 'pause');
+    await expect(page.locator('#panel-message')).toContainText('Concert en pause');
     const before = await canvas.screenshot();
     await page.keyboard.down(key);
     await expect(async () => { expect((await canvas.screenshot()).equals(before)).toBe(false); }).toPass();

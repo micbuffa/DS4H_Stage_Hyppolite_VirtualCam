@@ -66,3 +66,35 @@ test('updates the physical screen live while keeping camera selection independen
   await expect(page.locator('body')).toHaveAttribute('data-frame', stoppedFrame!);
   expect(errors).toEqual([]);
 });
+
+
+test('shows the instanced audience in the live C9 feed', async ({ page }) => {
+  const errors = checkErrors(page);
+  await page.goto('/tests/e2e/fixtures/feed.html?audience');
+  await expect(page.locator('body')).toHaveAttribute('data-ready', 'true');
+  const full = await measure(page);
+  await page.getByLabel('Écran gauche en direct').screenshot({ path: 'test-results/t09-c9-live.png', style: 'nav{visibility:hidden}' });
+  const toggle = page.getByRole('button', { name: 'Afficher ou masquer le public' });
+  await toggle.click();
+  await expect.poll(() => measure(page)).not.toBe(full);
+  await toggle.click();
+  await expect.poll(() => measure(page)).toBe(full);
+  expect(errors).toEqual([]);
+});
+
+
+test('animates the stage in the live feed and freezes and resumes its pixels', async ({ page }) => {
+  const errors = checkErrors(page);
+  await page.goto('/tests/e2e/fixtures/feed.html?show');
+  await expect(page.locator('body')).toHaveAttribute('data-ready', 'true');
+  const moving = await measure(page);
+  await expect.poll(() => measure(page)).not.toBe(moving);
+  const pause = page.getByRole('button', { name: 'Basculer la pause' });
+  await pause.click();
+  const frozen = await measure(page);
+  expect(await measure(page)).toBe(frozen);
+  await page.getByLabel('Écran gauche en direct').screenshot({ path: 'test-results/t10-live.png', style: 'nav{visibility:hidden}' });
+  await pause.click();
+  await expect.poll(() => measure(page)).not.toBe(frozen);
+  expect(errors).toEqual([]);
+});

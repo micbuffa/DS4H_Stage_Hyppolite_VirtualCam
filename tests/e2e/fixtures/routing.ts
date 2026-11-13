@@ -7,6 +7,11 @@ import { createConcertScene } from '../../../src/infrastructure/babylon/engine/c
 import { createCaptureCameras } from '../../../src/infrastructure/babylon/cameras/createCaptureCameras';
 import { createCameraFeed } from '../../../src/infrastructure/babylon/rendering/createCameraFeed';
 import { createRoutingRenderer } from '../../../src/infrastructure/babylon/rendering/createRoutingRenderer';
+import { DirectorPanel } from '../../../src/application/commands/directorPanel';
+import { CameraEditor } from '../../../src/application/commands/cameraEditor';
+import { createDirectorPanel } from '../../../src/infrastructure/babylon/ui/createDirectorPanel';
+import { lookAtRotation } from '../../../src/domain/cameras/cameraDefinition';
+import { panelPlacement } from '../../../src/domain/direction/panelLayout';
 import { watchSceneReadiness } from '../../../src/infrastructure/babylon/engine/watchSceneReadiness';
 
 const engine = new Engine(document.querySelector('canvas')!, true);
@@ -28,6 +33,45 @@ const renderer = createRoutingRenderer(scene, screens, captures, {
   waitForPresentation: watchSceneReadiness,
 });
 const director = new RoutingDirector(registry, renderer);
+if (params.has('stress')) {
+  Object.assign(window, {
+    async cycleCuts() {
+      const textures = scene.textures.length - 1; // The initialized shared C1 is replaced by the first cut.
+      const renderObservers = scene.onBeforeRenderObservable.observers.filter((observer) => !observer._willBeUnregistered).length - 1;
+      for (let i = 0; i < 100; i++) {
+        const expected = i % 2 === 0 ? 3 : 1;
+        const transaction = await renderer.prepare(expected === 3 ? { 1: 2, 2: 5, 3: 9 } : { 1: 1, 2: 1, 3: 1 });
+        await transaction.commit();
+        transaction.complete();
+        const observers = scene.onBeforeRenderObservable.observers.filter((observer) => !observer._willBeUnregistered).length;
+        if (scene.customRenderTargets.length !== expected || scene.textures.length !== textures + expected || observers !== renderObservers + expected) {
+          throw new Error('Fuite de ressources à la coupe ' + (i + 1));
+        }
+      }
+      return 100;
+    },
+  });
+}
+const panel = params.has('panel') ? createDirectorPanel(scene) : undefined;
+const editor = panel ? new CameraEditor(registry, { suspend() {}, resume() {} }) : undefined;
+const panelCommands = panel && editor ? new DirectorPanel(registry, director, editor, panel, () => undefined) : undefined;
+if (panel) {
+  for (const [id, x] of [[1, 7], [4, 9], [7, 11]] as const) {
+    const position = [x, 9, -24] as const;
+    registry.updatePose(id, { position, rotation: lookAtRotation(position, panelPlacement.position) });
+  }
+  const filmPanel = document.createElement('button');
+  filmPanel.id = 'film-panel';
+  filmPanel.textContent = 'Inclure le panneau dans les flux de recette';
+  document.body.append(filmPanel);
+  filmPanel.addEventListener('click', () => {
+    for (const mesh of panel.root.getChildMeshes()) {
+      mesh.metadata.category = 'concert';
+      mesh.layerMask = 1;
+    }
+    scene.onAfterRenderObservable.addOnce(() => { document.body.dataset.panelFilmable = 'true'; });
+  });
+}
 let maxActive = 0;
 scene.onAfterRenderObservable.add(() => {
   maxActive = Math.max(maxActive, scene.customRenderTargets.length);
@@ -67,4 +111,4 @@ click('measure', () => { void (async () => {
 click('stop', () => { director.dispose(); director.dispose(); document.body.dataset.stopped = String(scene.customRenderTargets.length); });
 engine.runRenderLoop(() => scene.render());
 run(director.initialize());
-window.addEventListener('pagehide', () => { director.dispose(); captures.dispose(); scene.dispose(); engine.dispose(); }, { once: true });
+window.addEventListener('pagehide', () => { panelCommands?.dispose(); editor?.dispose(); director.dispose(); panel?.dispose(); captures.dispose(); scene.dispose(); engine.dispose(); }, { once: true });

@@ -1,3 +1,4 @@
+import { feedSizeFor } from '../../../domain/rendering/feedQuality';
 import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { BaseTexture } from '@babylonjs/core/Materials/Textures/baseTexture';
@@ -23,9 +24,10 @@ export function createRoutingRenderer(scene: Scene, screens: ReturnType<typeof c
     getTexture: () => screen.material.emissiveTexture,
     setTexture: (texture) => { screen.material.emissiveTexture = texture; },
   }]));
+  let quality = 'standard';
   const router = new FeedRouter<BaseTexture>({
     screens: ports,
-    createFeed: (id) => dependencies.createFeed(scene, cameras.rigs.get(id)!.camera),
+    createFeed: (id) => dependencies.createFeed(scene, cameras.rigs.get(id)!.camera, feedSizeFor(quality)),
     waitForPresentation: () => dependencies.waitForPresentation(scene),
   });
   let disposed = false;
@@ -38,5 +40,16 @@ export function createRoutingRenderer(scene: Scene, screens: ReturnType<typeof c
     fallbacks.forEach((texture) => texture.dispose());
   };
   const onDispose = scene.onDisposeObservable.add(dispose);
-  return { prepare: (routes: RoutingTable) => router.prepare(routes), stats: () => router.stats(), dispose };
+  return {
+    prepare: (routes: RoutingTable) => router.prepare(routes),
+    stats: () => router.stats(),
+    async setQuality(next: string) {
+      const size = feedSizeFor(next);
+      if (disposed) throw new Error('La régie est arrêtée.');
+      if (next === quality) return;
+      await router.replaceFeeds((id) => dependencies.createFeed(scene, cameras.rigs.get(id)!.camera, size));
+      quality = next;
+    },
+    dispose,
+  };
 }

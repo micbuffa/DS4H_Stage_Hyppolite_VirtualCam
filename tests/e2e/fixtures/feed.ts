@@ -10,16 +10,27 @@ import { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { CameraRegistry } from '../../../src/domain/cameras/cameraRegistry';
 import { createCameraPresets } from '../../../src/domain/cameras/cameraPresets';
+import { attachConcertShow } from '../../../src/infrastructure/babylon/engine/attachConcertShow';
 import { createConcertScene } from '../../../src/infrastructure/babylon/engine/createObservationScene';
 import { createCaptureCameras } from '../../../src/infrastructure/babylon/cameras/createCaptureCameras';
 import { createFirstScreenFeed } from '../../../src/infrastructure/babylon/rendering/createFirstScreenFeed';
 import { createTestPattern } from '../../../src/infrastructure/babylon/models/screens/testPattern';
 
 const engine = new Engine(document.querySelector('canvas')!, true);
-const { scene, screens, band } = createConcertScene(engine);
+const concert = createConcertScene(engine);
+const { scene, screens, band, audience } = concert;
 const registry = new CameraRegistry(createCameraPresets());
 const captures = createCaptureCameras(scene, registry);
-const calibration = new URLSearchParams(location.search).has('calibration');
+const params = new URLSearchParams(location.search);
+const calibration = params.has('calibration');
+const audienceShot = params.has('audience');
+if (params.has('show')) {
+  const show = attachConcertShow(concert);
+  const toggle = document.createElement('button');
+  toggle.textContent = 'Basculer la pause';
+  toggle.addEventListener('click', () => show.clock.toggle());
+  document.querySelector('nav')!.append(toggle);
+}
 const screen = screens.screens[0];
 if (calibration) {
   for (const mesh of scene.meshes) if (mesh.metadata?.category === 'concert') mesh.setEnabled(false);
@@ -61,7 +72,7 @@ const resize = () => {
 };
 resize();
 window.addEventListener('resize', resize);
-const source = captures.rigs.get(1)!.camera;
+const source = captures.rigs.get(audienceShot ? 9 : 1)!.camera;
 const originalTexture = screen.material.emissiveTexture;
 const feed = createFirstScreenFeed(scene, source, screen);
 let frame = 0;
@@ -95,6 +106,12 @@ const measure = async () => {
   document.body.dataset.hash = [...new Uint8Array(hash)].map((value) => value.toString(16).padStart(2, '0')).join('');
   document.body.dataset.measure = String(Number(document.body.dataset.measure ?? 0) + 1);
 };
+if (audienceShot) {
+  const toggle = document.createElement('button');
+  toggle.textContent = 'Afficher ou masquer le public';
+  toggle.addEventListener('click', () => audience.root.setEnabled(!audience.root.isEnabled()));
+  document.querySelector('nav')!.append(toggle);
+}
 document.getElementById('measure')!.addEventListener('click', () => { void measure(); });
 document.getElementById('move')!.addEventListener('click', () => { band.musicians[0].root.position.x += 2; });
 document.getElementById('select')!.addEventListener('click', () => {

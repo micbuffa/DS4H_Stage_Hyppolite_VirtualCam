@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101823" />
+    <link rel="icon" href="data:," />
+    <title>Caméras virtuelles · Laboratoire 3D</title>
+  </head>
+  <body>
+    <main>
+      <header><span class="eyebrow">DS4H · LABORATOIRE BABYLONJS</span><h1>Caméras virtuelles</h1><p>T07 — Caméras manipulables</p></header>
+      <canvas id="renderCanvas" aria-label="Vue 3D navigable du laboratoire" tabindex="0"></canvas>
+      <aside aria-label="Aide à la navigation"><strong id="selected-camera">Caméra sélectionnée : C1</strong><p>ZQSD / Flèches : déplacement · Glisser : orbite</p><p class="muted">Molette / défilement à deux doigts : zoom · Clic droit + glisser : déplacement</p><p class="muted">Cliquer sur un boîtier ou son label C1…C9 pour sélectionner. Frustum indicatif : 5 m · 16:9.</p><nav aria-label="Commandes caméra"><button id="home-view" type="button">Vue régie (R)</button><button id="camera-aids" type="button" aria-pressed="true">Masquer les aides (H)</button><button id="reset-camera" type="button">Réinitialiser C1</button></nav><p class="muted" id="feed-status">Préparation des écrans…</p></aside>
+      <section class="editing-panel" aria-label="Édition caméra"><h2>Édition caméra</h2><div class="editing-buttons"><button id="edit-move" type="button" aria-pressed="false">Déplacer</button><button id="edit-rotate" type="button" aria-pressed="false">Orienter</button><button id="fov-minus" type="button">FOV −</button><button id="fov-plus" type="button">FOV +</button><button id="aim-stage" type="button">Viser la scène</button></div><p id="editing-message" aria-live="polite">Choisir un outil.</p><p class="muted editing-help">Glisser les axes/plans ou anneaux. Échap annule/quitte. Le décor peut être traversé.</p></section>
+      <section id="routing-panel" aria-label="Régie" class="routing-panel">
+        <h2>Régie</h2>
+        <label for="routing-camera" class="visually-hidden">Caméra à diffuser</label>
+        <select id="routing-camera" aria-label="Caméra à diffuser"></select>
+        <p class="muted">Écrans cibles</p>
+        <div class="target-buttons">
+          <button id="target-1" type="button" aria-pressed="true">1 · Gauche</button>
+          <button id="target-2" type="button" aria-pressed="false">2 · Droite</button>
+          <button id="target-3" type="button" aria-pressed="false">3 · Centre</button>
+        </div>
+        <div class="routing-actions"><button id="all-screens" type="button">Tous les écrans</button><button id="broadcast" type="button" disabled>DIFFUSER</button></div>
+        <div class="routing-table" aria-live="polite"><p id="route-1">Écran 1 ← Sans signal</p><p id="route-2">Écran 2 ← Sans signal</p><p id="route-3">Écran 3 ← Sans signal</p></div>
+        <p id="routing-message" aria-live="polite">Préparation…</p>
+      </section>
+      <div style="position:absolute;top:155px;left:32px;z-index:3"><button id="locate">Repérer les axes</button><button id="measure">Lire le flux</button></div><p id="status" role="status">Initialisation de WebGL2…</p>
+    </main>
+    <script type="module" src="./editing.ts"></script>
+  </body>
+</html>

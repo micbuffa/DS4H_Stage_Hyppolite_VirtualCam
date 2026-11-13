@@ -49,6 +49,12 @@ export class CameraRegistry {
     this.emit();
   }
 
+  updateCamera(definition: CameraDefinition): void {
+    validateCamera(definition);
+    this.cameras.set(definition.id, cloneCamera(definition));
+    this.emit();
+  }
+
   resetSelected(): void {
     this.cameras.set(this.selectedId, cloneCamera(this.presets.get(this.selectedId)!));
     this.emit();

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickPanel } from './panelProjection';
 import { cameraLabelPosition } from './cameraProjection';
 
 test('selects a 3D camera without orbiting, toggles framing aids and returns to the home view', async ({ page }) => {
@@ -8,6 +9,8 @@ test('selects a 3D camera without orbiting, toggles framing aids and returns to 
   await page.goto('/');
   await expect(page.getByRole('status')).toContainText('Prêt à explorer');
   await page.waitForLoadState('networkidle');
+  await clickPanel(page, 'pause');
+  await expect(page.locator('#panel-message')).toContainText('Concert en pause');
   const selection = page.locator('#selected-camera');
   await expect(selection).toContainText('C1');
   const clip = { x: 880, y: 240, width: 180, height: 120 };
@@ -19,18 +22,16 @@ test('selects a 3D camera without orbiting, toggles framing aids and returns to 
   await page.mouse.up();
   await expect(selection).toContainText('C2');
   expect((await page.screenshot({ clip })).equals(initialScreen)).toBe(true);
-  await page.getByRole('button', { name: 'Masquer les aides' }).click();
-  await expect(page.getByRole('button', { name: 'Afficher les aides' })).toHaveAttribute('aria-pressed', 'false');
+  await clickPanel(page, 'aids');
   await page.getByLabel('Vue 3D navigable du laboratoire').focus();
   await page.keyboard.press('h');
-  await expect(page.getByRole('button', { name: 'Masquer les aides' })).toHaveAttribute('aria-pressed', 'true');
   await page.keyboard.down('q');
   await expect(async () => { expect((await page.screenshot({ clip })).equals(initialScreen)).toBe(false); }).toPass();
   await page.keyboard.up('q');
   await page.keyboard.press('r');
   await expect(selection).toContainText('C2');
   await expect(async () => { expect((await page.screenshot({ clip })).equals(initialScreen)).toBe(true); }).toPass();
-  await page.getByRole('button', { name: 'Réinitialiser C2' }).click();
+  await clickPanel(page, 'reset');
   await expect(selection).toContainText('C2');
   await page.mouse.move(1100, 400);
   await page.mouse.down();
@@ -52,7 +53,7 @@ test('renders nine distinct capture presets with editor helpers excluded', async
     const canvas = page.getByLabel('Vue caméra de captation');
     const screenshot = await canvas.screenshot({ path: `test-results/t04-camera-${id}.png` });
     views.add(screenshot.toString('base64'));
-    if ([4, 7, 8].includes(id)) await expect(canvas).toHaveScreenshot(`capture-C${id}.png`, { maxDiffPixelRatio: 0.005 });
+    if ([4, 7, 8, 9].includes(id)) await expect(canvas).toHaveScreenshot(`capture-C${id}.png`, { maxDiffPixelRatio: 0.005 });
   }
   expect(views.size).toBe(9);
   expect(errors).toEqual([]);
@@ -65,6 +66,5 @@ test('selects every numbered 3D label from the observation view', async ({ page 
     const position = cameraLabelPosition(id);
     await page.mouse.click(position.x, position.y);
     await expect(page.locator('#selected-camera')).toContainText(`C${id} ·`);
-    await expect(page.locator('#routing-camera')).toHaveValue(String(id));
   }
 });

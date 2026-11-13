@@ -80,3 +80,7 @@ La stratégie de partage des flux et la séparation métier/moteur sont des choi
 Préparer une première image avant de modifier les textures des matériaux. Remplacer les références de tous les écrans ciblés entre deux images et conserver les anciennes ressources jusqu'à la première présentation réussie. En cas d'échec, restaurer l'affectation complète. La suppression d'un consommateur ne détruit pas un flux encore utilisé ailleurs.
 
 Distinguer textures allouées et RTT programmées dans `scene.customRenderTargets`. Pour préparer une coupe depuis trois sources sans quatrième passe active, suspendre une source devenue inutile dans la prochaine table en conservant sa dernière image ; la reprendre si la préparation échoue. Le renderer possède et nettoie aussi les allocations partielles en cas d'échec GPU. Les écrans ne détruisent jamais les textures partagées.
+
+### Annulation des gestes d'édition
+
+Posséder explicitement la couche utilitaire et son observateur de référence. Les comportements natifs des axes ne doivent pas réattacher indépendamment la navigation si un port applicatif gère déjà cette responsabilité. Ne pas retirer le focus du canvas au démarrage d'un geste : le système de périphériques peut synthétiser un relâchement et valider prématurément la pose. Écouter les interruptions en capture, restaurer la pose avant le relâchement synthétique, puis libérer le drag natif. Tester le blur du canvas en plus de celui de la fenêtre, ainsi que pointercancel avec `pointerType: 'mouse'` pour activer le vrai chemin de traitement natif.

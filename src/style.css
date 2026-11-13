@@ -38,3 +38,21 @@ button:disabled { opacity: .45; cursor: default; }
 #routing-message[data-state="error"] { color: #ffb5b5; }
 @media (max-width: 1050px) { .routing-panel { width: 230px; right: 16px; font-size: 11px; } }
 @media (max-height: 650px) { .routing-panel { padding: 10px; } .routing-panel h2 { margin-bottom: 6px; } }
+
+.editing-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.editing-buttons button { font-size: 11px; padding: 6px 9px; }
+.editing-buttons button[aria-pressed="true"] { border-color: #f2b64c; background: #5c4424; }
+#editing-message { color: #93dfc5; font-size: 11px; }
+#editing-message[data-state="error"] { color: #ffb5b5; }
+.editing-help { font-size: 10px; }
+ .editing-panel { position: absolute; top: 96px; right: 28px; width: 270px; z-index: 2; padding: 10px 12px; background: #101823ed; border: 1px solid #344759; border-radius: 12px; }
+.editing-panel h2 { font-size: 14px; margin: 0; }
+.editing-panel p { margin: 6px 0 0; }
+.editing-panel .editing-buttons { margin-top: 6px; gap: 4px; }
+@media (max-width: 1050px) { .editing-panel { right: 16px; width: 230px; } }
+
+aside[aria-label="État de la régie"] { max-width: 510px; font-size: 11px; bottom: 16px; padding: 12px 16px; }
+#panel-message { max-width: 470px; color: #93dfc5; }
+#panel-message[data-state="error"] { color: #ffb5b5; }
+.help-text { position: absolute; top: 155px; left: 32px; max-width: 420px; z-index: 3; padding: 16px; border: 1px solid #527183; border-radius: 10px; background: #101823f5; font-size: 12px; }
+.help-text h2 { margin-top: 0; font-size: 16px; }

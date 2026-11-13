@@ -14,6 +14,7 @@ import type { Scene } from '@babylonjs/core/scene';
 import type { LinesMesh } from '@babylonjs/core/Meshes/linesMesh';
 import type { CameraId } from '../../../domain/cameras/cameraDefinition';
 import type { CameraRegistry } from '../../../domain/cameras/cameraRegistry';
+import { degreesToRadians } from '../../../domain/cameras/cameraEditing';
 import { frustumSegments } from '../../../domain/cameras/frustumSegments';
 import { createModelGroup } from '../models/modelGroup';
 import { cameraLabel } from '../ui/cameraLabel';
@@ -77,7 +78,7 @@ export function createCaptureCameras(scene: Scene, registry: CameraRegistry) {
       rig.root.position.set(...definition.pose.position);
       rig.root.rotationQuaternion = Quaternion.FromArray(definition.pose.rotation);
       rig.root.computeWorldMatrix(true);
-      rig.camera.fov = definition.fovDegrees * Math.PI / 180;
+      rig.camera.fov = degreesToRadians(definition.fovDegrees);
       rig.camera.minZ = definition.near;
       rig.camera.maxZ = definition.far;
       rig.label.position.copyFrom(rig.root.position).addInPlaceFromFloats(0, 0.95, 0);

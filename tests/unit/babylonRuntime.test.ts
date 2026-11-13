@@ -1,3 +1,5 @@
+vi.mock('../../src/infrastructure/babylon/ui/attachFeedQuality', () => ({ attachFeedQuality: () => vi.fn() }));
+vi.mock('../../src/infrastructure/babylon/engine/attachConcertShow', () => ({ attachConcertShow: () => ({ clock: undefined, dispose: vi.fn() }) }));
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const { engine, scene, detachKeyboard, detachCameraControls, disposeCameras, disposeFeed } = vi.hoisted(() => ({
@@ -21,6 +23,11 @@ vi.mock('../../src/infrastructure/babylon/cameras/createCaptureCameras', () => (
 vi.mock('../../src/infrastructure/babylon/interaction/attachCameraControls', () => ({ attachCameraControls: () => detachCameraControls }));
 vi.mock('../../src/infrastructure/babylon/rendering/createRoutingRenderer', () => ({ createRoutingRenderer: () => ({ prepare: vi.fn().mockResolvedValue({ commit: async () => undefined, complete: vi.fn(), rollback: vi.fn() }), dispose: disposeFeed }) }));
 vi.mock('../../src/infrastructure/babylon/ui/attachRoutingControls', () => ({ attachRoutingControls: () => vi.fn() }));
+vi.mock('../../src/infrastructure/babylon/interaction/createCameraGizmos', () => ({ createCameraGizmos: () => ({ dispose: vi.fn() }) }));
+vi.mock('../../src/infrastructure/babylon/ui/attachEditingControls', () => ({ attachEditingControls: () => vi.fn() }));
+vi.mock('../../src/infrastructure/babylon/ui/createDirectorPanel', () => ({ createDirectorPanel: () => ({ render: vi.fn(), dispose: vi.fn() }) }));
+vi.mock('../../src/infrastructure/babylon/ui/panelReadout', () => ({ panelReadout: vi.fn() }));
+vi.mock('../../src/infrastructure/babylon/interaction/attachPanelPicking', () => ({ attachPanelPicking: () => vi.fn() }));
 vi.mock('@babylonjs/core/Engines/engine', () => ({ Engine: class { constructor() { return engine; } } }));
 vi.mock('../../src/infrastructure/babylon/engine/createObservationScene', () => ({ createConcertScene: () => ({ scene, screens: { screens: [{ definition: { id: 1 } }] } }) }));
 import { createBabylonRuntime } from '../../src/infrastructure/babylon/engine/createBabylonRuntime';
@@ -28,7 +35,7 @@ import { createBabylonRuntime } from '../../src/infrastructure/babylon/engine/cr
 beforeEach(() => { vi.clearAllMocks(); engine.webGLVersion = 2; });
 
 it('stops the same render callback, detaches controls and disposes owned resources once', () => {
-  const runtime = createBabylonRuntime({} as HTMLCanvasElement);
+  const runtime = createBabylonRuntime({ ownerDocument: { getElementById: () => null } } as unknown as HTMLCanvasElement);
   runtime.start();
   runtime.start();
   const render = engine.runRenderLoop.mock.calls[0][0] as () => void;
@@ -55,6 +62,6 @@ it('stops the same render callback, detaches controls and disposes owned resourc
 
 it('rejects WebGL1 and releases the allocated engine', () => {
   engine.webGLVersion = 1;
-  expect(() => createBabylonRuntime({} as HTMLCanvasElement)).toThrow('WebGL2');
+  expect(() => createBabylonRuntime({ ownerDocument: { getElementById: () => null } } as unknown as HTMLCanvasElement)).toThrow('WebGL2');
   expect(engine.dispose).toHaveBeenCalledOnce();
 });

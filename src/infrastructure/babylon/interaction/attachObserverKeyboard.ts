@@ -2,13 +2,14 @@ import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { movementKey, observerTranslation } from '../../../domain/cameras/observerMovement';
 import type { MoveDirection } from '../../../domain/cameras/observerMovement';
 
-export function attachObserverKeyboard(camera: ArcRotateCamera, canvas: HTMLCanvasElement): () => void {
+export function attachObserverKeyboard(camera: ArcRotateCamera, canvas: HTMLCanvasElement, isEnabled = () => true): () => void {
   const scene = camera.getScene();
   const host = canvas.ownerDocument.defaultView!;
   const pressed = new Map<string, MoveDirection>();
   const directions = new Set<MoveDirection>();
   const clear = () => pressed.clear();
   const onDown = (event: KeyboardEvent) => {
+    if (!isEnabled()) { clear(); return; }
     if (event.metaKey || event.ctrlKey || event.altKey) { clear(); return; }
     const direction = movementKey(event.key);
     if (!direction || event.target !== canvas) return;
@@ -23,6 +24,7 @@ export function attachObserverKeyboard(camera: ArcRotateCamera, canvas: HTMLCanv
   const onVisibility = () => { if (canvas.ownerDocument.hidden) clear(); };
   canvas.ownerDocument.addEventListener('visibilitychange', onVisibility);
   const observer = scene.onBeforeRenderObservable.add(() => {
+    if (!isEnabled()) { clear(); return; }
     directions.clear();
     pressed.forEach((direction) => directions.add(direction));
     const translation = observerTranslation(directions, camera.alpha, scene.getEngine().getDeltaTime() / 1000);

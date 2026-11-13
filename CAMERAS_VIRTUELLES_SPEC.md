@@ -1,6 +1,6 @@
 # Caméras virtuelles — spécification et tâches incrémentales
 
-Version : 1.5 — 6 novembre 2026. Statut : T00 à T06 réalisées ; T07 est la prochaine tâche, non commencée ; T08 à T11 restent à réaliser. Documents associés : [instructions IA](AGENTS.md), [architecture](ARCHITECTURE.md), [bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md).
+Version 1.9 du 10 novembre 2026. T00 à T11 sont réalisées et validées. Documents associés : [instructions IA](AGENTS.md), [architecture](ARCHITECTURE.md), [bonnes pratiques BabylonJS](docs/BABYLONJS_BONNES_PRATIQUES.md).
 
 ## 1. Objectif pédagogique
 
@@ -31,7 +31,7 @@ Unité : mètre ; Y vertical ; repère gauche BabylonJS. La scène est vers +Z d
 
 Les écrans latéraux, environ 8 × 4,5 m, sont placés vers X=-17 et X=17, Z=10, centres à Y=7, tournés vers le public. L'écran central, environ 6,4 × 3,6 m, est placé au fond du plateau, vers Z=15, centre à Y=8. Leur pose finale sera ajustée pour la lisibilité ; le format 16:9 reste invariant.
 
-Le panneau de réalisation est au premier plan du point de vue initial, vers Z=-18. La vue initiale surélevée doit montrer simultanément le panneau, le plateau et les trois écrans. Une commande « VUE RÉGIE » rétablit cette vue sans changer les caméras ni la diffusion. Toutes les positions sont configurables dans un fichier dédié futur.
+Le panneau de réalisation est au premier plan à droite, à Z = −12. La vue initiale surélevée doit montrer simultanément le panneau, le plateau et les trois écrans. Une commande « VUE RÉGIE » rétablit cette vue sans changer les caméras ni la diffusion. La position et la disposition du panneau sont définies dans `src/domain/direction/panelLayout.ts`.
 
 ### 3.2 Éléments requis
 
@@ -143,7 +143,7 @@ Ne pas tester des pixels avec `NullEngine`. Les tests unitaires de gestion des f
 
 Les cases ne seront cochées qu'une fois les critères et tests satisfaits. Chaque étape doit laisser une application utilisable ; les fixtures provisoires nécessaires aux étapes initiales sont retirées quand leur remplacement est validé.
 
-Suivi : `[DONE]` indique une tâche terminée et validée ; `[CURRENT]` désigne l’étape active à traiter. T07 est la prochaine tâche ; son implémentation n’a pas encore commencé. Les tâches suivantes restent sans marqueur.
+Suivi : `[DONE]` indique une tâche terminée et validée ; `[CURRENT]` désigne l’étape active à traiter. Toutes les tâches du socle sont terminées.
 
 ### T00 [DONE] — Préparer la documentation pour les assistants
 
@@ -211,47 +211,51 @@ Dépendance : T05. État de réalisation, cibles multiples, commande atomique, p
 - **I** : une RTT pour trois écrans sur C1 ; trois RTT pour trois sources ; retour à une RTT après regroupement ; arrêt détruisant une seule fois les ressources partagées.
 - **B** : scénarios globaux 2, 3, 5, 6 et 7 ; aucune image noire transitoire issue d'un tampon non initialisé lors d'une coupe prête.
 
-### T07 [CURRENT] — Manipuler les caméras à la souris
+### T07 [DONE] — Manipuler les caméras à la souris
 
 Dépendance : T06. Gizmos de position et rotation, FOV, visée scène, annulation et réinitialisation ; commandes provisoires accessibles en attendant T08.
 
-- [ ] Critères : édition à la souris dans les trois axes, effet en direct sur tous les écrans concernés, navigation restaurée après toute sortie de geste.
+- [x] Critères : édition à la souris dans les trois axes, effet en direct sur tous les écrans concernés, navigation restaurée après toute sortie de geste.
+- Validation : 153 tests unitaires/intégration et 29 tests navigateur réussis ; contrôle des outils sur le serveur 5188, sans erreur de shader. Voir [compte rendu T07](docs/validation/T07.md).
 - **U** : bornes spatiales/FOV ; rejets NaN et infini ; quaternion invalide ; conversions degrés/radians ; cible dégénérée ; clipping invalide ; commit/annulation d'une pose ; arbitrage des modes d'entrée et restauration après erreur.
 - **I** : pose réelle synchronisée sans double transformation ; attachement au seul rig sélectionné ; frustum mis à jour ; réinitialisation sans changement d'affectation.
 - **B** : drag position/rotation ; FOV ; Échap ; perte de focus et `pointercancel` ; caméra d'observation immobile pendant le geste et navigable après.
 
-### T08 — Construire le panneau de réalisation 3D
+### T08 [DONE] — Construire le panneau de réalisation 3D
 
 Dépendances : T06 et T07. Remplacer les contrôles provisoires par le panneau complet décrit en section 5 ; ajouter aide et état accessibles à tout moment.
 
-- [ ] Critères : neuf boutons caméra et trois boutons écran distincts, toutes les commandes prévues, labels lisibles, états sélection/cibles/diffusion séparés.
+- [x] Neuf boutons caméra et trois boutons écran distincts, commandes lisibles et états de sélection, de cibles et de diffusion séparés. Pause est grisée jusqu’à T10.
+- 159 tests unitaires et d’intégration, 31 tests navigateur et build réussis. [Compte rendu T08](docs/validation/T08.md).
 - **U** : modèle de présentation des 12 boutons numérotés ; basculement des cibles ; sélection de toutes ; DIFFUSER désactivé si aucune cible ; correspondance de chaque commande ; labels après réussite/échec ; un clic consommé produit une seule commande.
 - **I** : souscriptions état/interface nettoyées ; boutons synchronisés après sélection via boîtier.
 - **B/M** : cliquer les vrais boutons par picking ; survol puis clic sans mouvement parasite ; contrôle à 1280 × 720 ; absence du panneau dans chaque flux ; scénario complet sans console ni outil de développement.
 
-### T09 — Ajouter le public
+### T09 [DONE] — Ajouter le public
 
 Dépendance : T08. Public déterministe, distribué dans les zones autorisées et basé sur des ressources partagées.
 
-- [ ] Critères : au moins 100 spectateurs, lisibles depuis C9, sans bloquer la manipulation ; population paramétrable.
+- [x] 144 spectateurs par défaut, visibles depuis C9. Effectif et graine configurables, picking des caméras et du pupitre vérifié.
+- 177 tests unitaires et d’intégration, 32 tests navigateur et build réussis. [Compte rendu T09](docs/validation/T09.md).
 - **U** : même graine donnant la même distribution ; nombre demandé ; zones interdites et marges respectées ; zéro population accepté et nombre négatif refusé.
 - **I** : instances/matériaux partagés et destruction complète ; public ajouté aux éléments filmables.
 - **B/M** : contrechamp C9 avec public et absence d'interception indésirable du picking des contrôles.
 
-### T10 — Ajouter éclairages et animations
+### T10 [DONE] — Ajouter éclairages et animations
 
 Dépendance : T09. Ambiance rock, projecteurs, mouvements légers, pause/reprise ; commencer avec budget d'ombres limité.
 
-- [ ] Critères : éclairages visibles dans les flux, musiciens lisibles, animation indépendante du nombre d'images, pause compatible avec la régie.
+- [x] Quatre projecteurs et animations visibles dans les flux. La pause conserve les commandes de réalisation. [Compte rendu T10](docs/validation/T10.md).
 - **U** : couleurs/intensités dans les bornes ; trajectoires à temps connu ; équivalence de deux découpages temporels ; pause sans saut à la reprise ; pas de progression pendant pause ; plafonnement du delta après onglet masqué.
 - **I** : transformations attendues ; observateurs désabonnés au démontage ; éléments animés conservés dans les listes des flux.
 - **B/M** : quatre projecteurs représentés, animation visible sur écrans, absence de surexposition majeure ; scénario global 9.
 
-### T11 — Stabiliser, mesurer et documenter l'expérimentation
+### T11 [DONE] — Stabiliser, mesurer et documenter l'expérimentation
 
 Dépendance : T10. Exécuter les scénarios globaux, traiter les erreurs et documenter les commandes ainsi que les mesures.
 
-- [ ] Critères : tous les tests requis réussis ; captures de trois sources distinctes ; guide utilisateur et bilan des performances.
+- [x] Les dix scénarios, 100 coupes et 20 cycles de montage et démontage sont vérifiés. Le guide, la capture des trois sources et le bilan des deux profils sont disponibles. [Compte rendu T11](docs/validation/T11.md).
+- 184 tests unitaires et d’intégration, 37 tests navigateur, une recette de performance séparée et build réussis.
 - **U** : états dégradés sur perte de disponibilité d'un port ; refus de commande après arrêt ; politique de qualité avec valeurs bornées ; changement de résolution sans changement d'affectation ; aucune double libération après réaffectations répétées.
 - **I/B** : 100 coupes alternées entre une et trois sources, puis 20 cycles de montage/démontage ; pas d'accumulation d'observateurs, de RTT ou de ressources possédées après stabilisation.
 - **B/M** : recette des dix scénarios globaux, resize du canvas, clavier/souris, absence d'erreurs console/GPU ; consigner toute limitation.

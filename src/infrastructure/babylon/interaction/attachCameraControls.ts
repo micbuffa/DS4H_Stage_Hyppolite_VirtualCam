@@ -4,7 +4,7 @@ import { resetObserver } from '../cameras/createObserver';
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import type { CameraRegistry } from '../../../domain/cameras/cameraRegistry';
 
-export function attachCameraControls(canvas: HTMLCanvasElement, registry: CameraRegistry, observer: ArcRotateCamera): () => void {
+export function attachCameraControls(canvas: HTMLCanvasElement, registry: CameraRegistry, observer: ArcRotateCamera, editing?: { cancel(): void; reset(): void; snapshot(): { dragging: boolean } }): () => void {
   const scene = observer.getScene();
   const document = canvas.ownerDocument;
   const host = document.defaultView!;
@@ -21,6 +21,7 @@ export function attachCameraControls(canvas: HTMLCanvasElement, registry: Camera
       if (info.type === PointerEventTypes.POINTERUP) clear();
       return;
     }
+    if (info.skipOnPointerObservable || editing?.snapshot().dragging) return;
     if (info.type !== PointerEventTypes.POINTERDOWN || info.event.button !== 0) return;
     const hit = scene.pick(info.localPosition.x, info.localPosition.y,
       (mesh) => mesh.isPickable && mesh.isEnabled() && mesh.isVisible && mesh.metadata?.category === 'camera-helper', false, observer);
@@ -32,13 +33,14 @@ export function attachCameraControls(canvas: HTMLCanvasElement, registry: Camera
     canvas.focus({ preventScroll: true });
   });
   const goHome = () => {
+    editing?.cancel();
     // Blur clears held movement keys; refocusing resumes navigation without a stuck key.
     canvas.blur();
     resetObserver(observer);
     canvas.focus({ preventScroll: true });
   };
   const toggleAids = () => registry.setAidsVisible(!registry.snapshot().aidsVisible);
-  const resetCamera = () => registry.resetSelected();
+  const resetCamera = () => { if (editing) editing.reset(); else registry.resetSelected(); };
   const key = (event: KeyboardEvent) => {
     const target = event.target as HTMLElement | null;
     if (event.metaKey || event.ctrlKey || event.altKey || event.repeat || target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? '')) return;

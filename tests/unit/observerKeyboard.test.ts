@@ -4,7 +4,7 @@ import { Scene } from '@babylonjs/core/scene';
 import { createObserver } from '../../src/infrastructure/babylon/cameras/createObserver';
 import { attachObserverKeyboard } from '../../src/infrastructure/babylon/interaction/attachObserverKeyboard';
 
-function fixture() {
+function fixture(isEnabled = () => true) {
   const engine = new NullEngine();
   vi.spyOn(engine, 'getDeltaTime').mockReturnValue(100);
   const scene = new Scene(engine);
@@ -12,7 +12,7 @@ function fixture() {
   const host = new EventTarget();
   const document = Object.assign(new EventTarget(), { defaultView: host, hidden: false });
   const canvas = Object.assign(new EventTarget(), { ownerDocument: document });
-  const detach = attachObserverKeyboard(camera, canvas as unknown as HTMLCanvasElement);
+  const detach = attachObserverKeyboard(camera, canvas as unknown as HTMLCanvasElement, isEnabled);
   const key = (target: EventTarget, type: string, value: string, extra = {}) => {
     const event = Object.assign(new Event(type, { cancelable: true }), { key: value, ...extra });
     target.dispatchEvent(event);
@@ -76,5 +76,21 @@ it('ignores other inputs, bounds horizontal movement and removes listeners on di
     f.key(f.canvas, 'keydown', 'd'); f.tick();
     expect(f.camera.target.x).toBe(0);
     expect(f.scene.onBeforeRenderObservable.observers.filter((observer) => !observer._willBeUnregistered)).toHaveLength(0);
+  } finally { f.dispose(); }
+});
+
+it('clears movement during an editing gesture and requires a fresh key after resuming', () => {
+  let enabled = true;
+  const f = fixture(() => enabled);
+  try {
+    const origin = f.camera.target.clone();
+    f.key(f.canvas, 'keydown', 'z');
+    enabled = false; f.tick();
+    f.key(f.canvas, 'keydown', 'd'); f.tick();
+    expect(f.camera.target.asArray()).toEqual(origin.asArray());
+    enabled = true; f.tick();
+    expect(f.camera.target.asArray()).toEqual(origin.asArray());
+    f.key(f.canvas, 'keydown', 'd'); f.tick();
+    expect(f.camera.target.x).toBeGreaterThan(origin.x);
   } finally { f.dispose(); }
 });
