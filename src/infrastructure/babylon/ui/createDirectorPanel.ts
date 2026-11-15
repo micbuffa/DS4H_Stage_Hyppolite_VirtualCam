@@ -10,7 +10,7 @@ import { createModelGroup } from '../models/modelGroup';
 import { createPanelLabel } from './panelLabel';
 import type { PanelLabel, PanelLabelStyle } from './panelLabel';
 
-interface PanelFace { label: PanelLabel; signature: string }
+interface PanelFace { label: PanelLabel; signature: string; plane: Mesh }
 
 export function createDirectorPanel(scene: Scene, labels = createPanelLabel) {
   const group = createModelGroup(scene, 'director-panel');
@@ -28,7 +28,7 @@ export function createDirectorPanel(scene: Scene, labels = createPanelLabel) {
     material.disableLighting = true; material.diffuseColor = Color3.Black(); material.emissiveColor = Color3.Black();
     const label = labels(scene, `panel-${name}-label`, Math.round(width * 128), Math.round(height * 128));
     material.emissiveTexture = group.ownTexture(label.texture); plane.material = material;
-    return { label, signature: '' };
+    return { label, signature: '', plane };
   };
   const paint = (entry: PanelFace, style: PanelLabelStyle) => {
     const signature = JSON.stringify(style);
@@ -39,12 +39,14 @@ export function createDirectorPanel(scene: Scene, labels = createPanelLabel) {
     const label = face(name, x, y, width, height, -0.18);
     paint(label, { lines, background: '#13232d', color: '#c9e4ec', large }); return label;
   };
-  text('title', 0, 3.65, 12.2, 0.5, ['RÉGIE · CONCERT LIVE'], true);
+  text('title', -3.2, 3.65, 5.4, 0.5, ['RÉGIE · CONCERT LIVE'], true);
   text('cameras-heading', -3.2, 3.05, 5.4, 0.4, ['CAMÉRAS']);
   text('screens-heading', 2.7, 3.05, 6.1, 0.4, ['ÉCRANS CIBLES']);
   const selection = text('selection', -3.2, -1.62, 5.4, 0.5, ['Sélection : C1']);
   const routes = text('routes', -3.2, -2.55, 5.4, 1.12, ['Sans signal']);
   const message = text('message', 2.7, -3.22, 6.1, 1.15, ['Préparation…']);
+  const transition = text('transition', 2.7, -2.11, 6.1, 0.65, ['Coupe · 0 ms']);
+  transition.plane.setEnabled(false);
   const buttons = new Map<PanelButtonId, Mesh>();
   const buttonLabels = new Map<PanelButtonId, PanelFace>();
   for (const definition of panelButtons) {
@@ -58,6 +60,8 @@ export function createDirectorPanel(scene: Scene, labels = createPanelLabel) {
   const render = (next: DirectorPanelModel) => {
     model = next;
     for (const button of next.buttons) {
+      buttons.get(button.id)!.setEnabled(button.visible);
+      buttonLabels.get(button.id)!.plane.setEnabled(button.visible);
       paint(buttonLabels.get(button.id)!, {
         lines: [button.label, ...(button.detail ? [button.detail] : [])],
         background: !button.enabled ? '#263039' : button.selected ? '#705324' : button.id === 'broadcast' ? '#9b511c' : '#203e50',
@@ -68,6 +72,8 @@ export function createDirectorPanel(scene: Scene, labels = createPanelLabel) {
       buttons.get(button.id)!.metadata.enabled = button.enabled;
     }
     paint(selection, { lines: [next.selected], background: '#13232d', color: '#ffd16a' });
+    transition.plane.setEnabled(next.transitionPage && !next.travelPage);
+    paint(transition, { lines: [next.transitionLabel], background: '#13232d', color: '#a5efd7' });
     paint(routes, { lines: next.routes, background: '#13232d', color: '#a5efd7' });
     const hoverReason = next.buttons.find((button) => button.id === hovered)?.reason;
     paint(message, { lines: [hoverReason || next.message], maxCharacters: 40, background: '#13232d', color: next.error ? '#ffc0b4' : '#c9e4ec' });

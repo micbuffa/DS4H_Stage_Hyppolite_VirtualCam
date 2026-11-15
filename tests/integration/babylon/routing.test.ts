@@ -60,3 +60,37 @@ it('cleans a partially allocated native feed when GPU allocation fails', () => {
     expect(scene.customRenderTargets).toHaveLength(0);
   } finally { scene.dispose(); engine.dispose(); }
 });
+
+it('propagates cancellation through the native renderer and removes the warming RTT without a late swap', async () => {
+  const engine = new NullEngine();
+  const { scene, screens } = createConcertScene(engine);
+  const registry = new CameraRegistry(createCameraPresets());
+  const cameras = createCaptureCameras(scene, registry);
+  const disposed = vi.fn();
+  const renderer = createRoutingRenderer(scene, screens, cameras, {
+    createFeed: (scene, camera) => {
+      const feed = createCameraFeed(scene, camera);
+      void feed.ready.catch(() => undefined);
+      const delayed = camera === cameras.rigs.get(4)!.camera;
+      return { ...feed, ready: delayed ? new Promise<void>(() => undefined) : Promise.resolve(),
+        dispose: () => { feed.dispose(); if (delayed) disposed(); } };
+    },
+    waitForPresentation: () => ({ ready: Promise.resolve(), dispose: () => undefined }),
+  });
+  const director = new RoutingDirector(registry, renderer);
+  try {
+    await director.initialize();
+    const textures = [...scene.textures];
+    const previous = screens.screens.map((screen) => screen.material.emissiveTexture);
+    const cut = director.assign(4, [1]); const rejected = expect(cut).rejects.toThrow('annulée');
+    expect(scene.customRenderTargets).toHaveLength(2);
+    director.cancelTransition(); await rejected;
+    expect(disposed).toHaveBeenCalledOnce();
+    expect(scene.customRenderTargets).toHaveLength(1);
+    expect(scene.textures).toEqual(textures);
+    expect(screens.screens.map((screen) => screen.material.emissiveTexture)).toEqual(previous);
+    expect(director.snapshot().routes).toEqual({ 1: 1, 2: 1, 3: 1 });
+    await director.assign(7, [2]);
+    expect(renderer.stats().consumers).toEqual({ 1: 2, 7: 1 });
+  } finally { director.dispose(); cameras.dispose(); scene.dispose(); engine.dispose(); }
+});

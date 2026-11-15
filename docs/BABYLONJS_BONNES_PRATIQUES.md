@@ -1,6 +1,6 @@
 # Bonnes pratiques BabylonJS
 
-Ce document guide la future implémentation. Les API citées sont des pistes vérifiées dans les sources officielles le 6 novembre 2026 ; vérifier leurs signatures avec les versions effectivement installées avant de coder.
+Ce document guide le développement du socle et de la phase transitions décrite dans la [spécification version 2.2](../CAMERAS_VIRTUELLES_SPEC.md). Au 15 novembre 2026, les contrats T12, les effets 2D T13 à T15, la prévisualisation T16, les trajets T17 et les commandes multiécrans T18 sont validés selon leurs comptes rendus ; la stabilité en longue série et les mesures matérielles restent à T19. Les API citées sont des pistes vérifiées dans les sources officielles le 6 novembre 2026 ; vérifier leurs signatures avec les versions effectivement installées avant de coder. La [décision 0006](decisions/0006-transitions-previsualisation-et-budgets.md) consigne la conception et l'inspection des sources 9.34.0.
 
 ## Projet et dépendances
 
@@ -32,10 +32,10 @@ Ce document guide la future implémentation. Les API citées sont des pistes vé
 
 ## Flux vidéo sur surfaces 3D
 
-- Employer une `RenderTargetTexture` par source effectivement diffusée, avec caméra de captation explicitement associée. L'enregistrer une seule fois dans le mécanisme de rendu retenu.
+- Employer une `RenderTargetTexture` par source consommée, avec caméra de captation explicitement associée. Dans le socle, ces consommateurs sont les écrans ; la phase transitions ajoute aperçu, départs, destination et caméra temporaire. L'enregistrer une seule fois dans le mécanisme de rendu retenu.
 - Conserver la caméra d'observation pour la vue principale ; ne pas lui substituer la caméra sélectionnée pour produire un flux.
 - Préparer une liste de rendu explicite incluant les objets filmables créés ultérieurement. Exclure toutes les surfaces vidéo pour empêcher les dépendances circulaires, ainsi que les aides et le panneau.
-- Partager une RTT si plusieurs écrans diffusent la même caméra. Libérer le flux quand son dernier écran le quitte.
+- Partager une RTT si plusieurs écrans diffusent la même caméra. Libérer le flux après le départ de son dernier consommateur, y compris aperçu et réservation pour restauration dans la phase transitions.
 - Utiliser une surface vidéo émissive/non éclairée, sans teinte du matériau. Avec `StandardMaterial`, la couleur émissive constante s’ajoute à la texture : la mettre à noir pour une image non blanchie. Vérifier gamma, exposition et rendu des couleurs avec une mire ; ne pas corriger arbitrairement par des facteurs magiques.
 - Fixer surfaces et RTT en 16:9 ; ne pas étirer les images. Tester une mire asymétrique pour détecter miroir, retournement UV et mauvais cadrage.
 - Valider que le ratio de projection de chaque caméra de flux correspond à sa RTT, indépendamment du ratio du canvas. Éviter qu'une matrice de projection en cache conserve le ratio de la vue principale.
@@ -77,9 +77,49 @@ La stratégie de partage des flux et la séparation métier/moteur sont des choi
 
 ### Coupes multiécrans et budget de rendu
 
+Cette section décrit la coupe du socle. La suspension d'une source remplacée ne doit pas être réutilisée pour figer une image encore visible dans un mélange de transition.
+
 Préparer une première image avant de modifier les textures des matériaux. Remplacer les références de tous les écrans ciblés entre deux images et conserver les anciennes ressources jusqu'à la première présentation réussie. En cas d'échec, restaurer l'affectation complète. La suppression d'un consommateur ne détruit pas un flux encore utilisé ailleurs.
 
 Distinguer textures allouées et RTT programmées dans `scene.customRenderTargets`. Pour préparer une coupe depuis trois sources sans quatrième passe active, suspendre une source devenue inutile dans la prochaine table en conservant sa dernière image ; la reprendre si la préparation échoue. Le renderer possède et nettoie aussi les allocations partielles en cas d'échec GPU. Les écrans ne détruisent jamais les textures partagées.
+
+### Effets et aperçu — exigences de la phase transitions
+
+- Préparer les deux flux et le shader avant de lancer la progression. Mélanger uniquement sur les surfaces vidéo, avec A et B en direct pendant leur contribution visible ; conserver la vue d'observation et les exclusions du socle, y compris le futur moniteur.
+- Respecter les plafonds de RTT de captation actives : trois au repos sans aperçu, quatre avec aperçu ou pendant un effet 2D, cinq pour un trajet séquentiel. Suspendre l'aperçu avant diffusion, test de trajet ou changement de profil. Lors de son remplacement, suspendre l'ancienne source distincte avant d'acquérir la suivante ; conserver l'image et l'ID précédents pour récupération.
+- Distinguer sources actives, allocations conservées, vue principale et dessins de composition. Éviter une RTT intermédiaire par écran. Ne pas allouer matériaux, vecteurs ou tableaux à chaque image sans nécessité.
+- Vérifier les espaces de couleur au mélange : la décision T12 prévoit décodage gamma, mélange en espace linéaire et réencodage unique, avec échantillons directs aux extrémités. Vérifier cette politique avec une mire à T13, sans appliquer deux fois gamma/exposition ni corriger l'apparence par une constante arbitraire. Les extrémités doivent correspondre aux images directes.
+- Pour les UV déformées, définir le traitement des bords et des zones hors image ; aucun échantillonnage non initialisé. Garder un rendu déterministe à progression et graine fixes. Le split conserve le ratio avec bandes si nécessaire ; le zoom graphique ne change pas le FOV métier.
+- Pour les grilles T14, conserver un shader par surface et une paire de sources partagées, sans allocation par case. Le hash entier GLSL reste dans le domaine exactement représentable ; comparer son calendrier au métier sur GPU. `setArray2` transmet le vec2 de grille dans BabylonJS 9.34.0. Les références du concert utilisent des temps d'animation connus ; un délai de capture adapté au rendu logiciel ne doit pas assouplir les tolérances de pixels.
+- Pour T15, traiter explicitement la douceur nulle du masque, sans `smoothstep` à bornes égales. Garder le Glitch sans gain de luminosité ni flash ajouté et borner ses UV ; le Zoom ne touche pas aux caméras. Ajuster les deux cadrages complets du split avec une même échelle X/Y, des bandes définies et des tests des coins sur GPU. Comparer les neuf poses/FOV natifs avant, pendant et après les effets.
+- Pour T16, initialiser toutes les textures du moniteur, y compris ses textes, avant d'attendre la disponibilité de scène. Emprunter les flux via leases, conserver l'ancien aperçu suspendu pendant le remplacement et invalider les préparations périmées. Libérer l'aperçu avant les acquisitions du direct ou de qualité ; pour une affectation identique, arrêter seulement le test et conserver la texture. Vérifier les gardes de drag avant suspension et les verrous dès le plan en attente. Exclure aussi caisson, raccord et textes des captations. Inspecter la visibilité depuis la vue régie, pas seulement le ratio d'un moniteur isolé.
+- Avec `ShaderMaterial` 9.34.0, une préparation par `isReady(mesh)` sans sous-maillage doit détenir l'effet au niveau du matériau (cinquième argument `storeEffectOnSubMeshes: false`). Sa destruction libère alors aussi l'effet de préparation en échec ; sinon le cache peut garder un programme non prêt et bloquer `scene.isReady(true)` lors d'une transition suivante. Vérifier ce cas dans un vrai navigateur.
+- Préparer les shaders avec des observateurs possédés et annulables. La boucle native de `forceCompilationAsync` n'expose pas d'annulation de ses timers ; T13 utilise une vérification par fin d'image, avec retrait sur disponibilité, erreur, annulation et arrêt.
+- Les effets utilisent une progression indépendante de l'horloge du concert. La pause du spectacle n'arrête pas le passage ; l'onglet masqué le suspend sans saut au retour. Nettoyer tous les abonnements de visibilité au démontage.
+- Préserver les ressources de restauration jusqu'à la présentation finale de l'opération entière. Une erreur de shader/source ou une annulation restaure toutes les cibles ; un résultat asynchrone périmé ne doit ni remplacer l'aperçu courant ni recréer des ressources après arrêt.
+- Pour T18, réutiliser le calendrier métier pour le résumé du pupitre, filtrer les cibles inchangées avant le calcul du délai et montrer le mode effectif. Une coupe décalée utilise la transaction 2D à quatre sources vivantes, avec des progressions par écran exclusivement 0/1 ; le chemin de coupe instantanée garde son budget de trois sources. Tester les pixels de chaque écran séquentiellement si la caméra d'inspection est partagée, puis annuler ou injecter une panne après la première étape. Ne pas geler les sources d'attente ou de restauration et ne pas allouer une nouvelle caméra temporaire à chaque écran.
+- Conserver les règles d'édition pour Échap et les pertes de focus. Pendant une transition, les mutations des caméras participantes et le changement de profil sont refusés explicitement ; les réglages de la prochaine commande ne retouchent pas celle en cours.
+- Tester sur GPU les images à 0, 25, 50, 75 et 100 %, avec mire puis concert animé, ainsi que les annulations tardives et erreurs. Les captures Windows doivent être inspectées avant adoption et rester distinctes des références macOS.
+
+### Caméra de trajet — exigences de la phase transitions
+
+La caméra temporaire possède sa durée de vie, reste hors registre 1…9 et n'a aucune entrée utilisateur. Interpoler le quaternion par le chemin court ; appliquer une progression douce à la position et au FOV. Vérifier l'arrivée par comparaison avec le cadrage B sans modifier les rigs.
+
+Déclarer les volumes d'obstacles par configuration ou références explicites. Valider l'enveloppe du trajet entre les points, pas seulement ses sommets. Refuser un chemin bloqué avec explication et laisser choisir un autre passage. La prévisualisation permet d'inspecter les occultations restantes ; elle ne garantit pas un sujet constamment visible. Aucun planificateur universel de chemin n'est présumé disponible.
+
+Premier lot T17 : les calculs purs et les volumes explicites sont implémentés. Les intersections continues portent sur des segments droits, avec enveloppe sphérique du plan proche plus 25 cm, testée contre des boîtes dilatées. Ne pas remplacer ces segments par une courbe qui dépasse leurs enveloppes sans adapter la validation. Conserver la capture des poses avant toute suspension asynchrone de l'aperçu. Le test NullEngine d'inclusion des géométries dans les volumes vérifie uniquement leur correspondance spatiale.
+
+Deuxième lot T17 : la source temporaire réutilise `createCameraFeed` et le pool existant avec une réservation exclusive. Garder la même hiérarchie de pose que les rigs numérotés, le FOV vertical et les exclusions. Après chaque changement de pose, attendre un dessin réel puis une fin d'image ; rejeter les attentes périmées avant de déplacer de nouveau le point de vue. Un bind de RTT ne valide pas le dessin. Annulation, erreur et arrêt retirent tous les observateurs. La comparaison des flux aux extrémités ne valide pas à elle seule la présentation finale vers B.
+
+Troisième lot T17 : la composition attend la présentation de la caméra temporaire à B, puis présente le flux B avant de réutiliser la caméra pour un autre écran. Même après un grand saut d'horloge, terminer les étapes successivement en présentant leurs extrémités. Transmettre et attendre les promesses de `PreparedTransition.render`, sans modifier le calendrier des rendus synchrones 2D. Conserver les sources initiales jusqu'à la validation globale ; restaurer leurs références sur toutes les cibles avant de libérer la RTT temporaire. Comparer le framebuffer principal avant/après le relais, en plus des pixels des sources, et vérifier les annulations/pannes après une étape déjà visible.
+
+Quatrième lot T17 : le moniteur reçoit la même factory de composition, adaptée à sa seule surface. Libérer la lease d'aperçu simple avant les acquisitions de trajet ; conserver B pour son retour, libérer la caméra temporaire puis A avant d'acquérir la lease d'aperçu de B. Ne pas recréer cette texture déjà prête à la promotion. Une révision périmée, un arrêt, une diffusion ou un changement de qualité interdit cette reprise. Verrouiller les participants dès le plan de test en attente et permettre son annulation avant la première acquisition. Distinguer explicitement « Vue temporaire » et l'aperçu d'une caméra numérotée. Garder les indices des effets 2D inchangés en ajoutant le trajet à la fin du catalogue et masquer le texte d'état natif lorsqu'une rangée de réglages réutilise son emplacement.
+
+Le suivi natif de visibilité doit rester actif pendant une attente de rendu asynchrone, même quand aucune demande `nextSample` n'est en cours. Retirer le temps masqué à la lecture suivante et nettoyer ce suivi au démontage de la scène. Un couple caché/visible entièrement compris dans une attente ne doit pas produire de saut de progression. Tester aussi un démarrage masqué.
+
+### Mesures de la nouvelle phase
+
+Comparer coupe, fondu, effets complexes, trajet et aperçu avec le protocole de la spécification, sur les deux profils vidéo. Consigner passes et allocations au pic, temps de préparation, moyenne et P95 des temps d'image, résolution réelle, machine et backend graphique. Un lancement de Chrome installé ne prouve pas l'utilisation du GPU matériel : vérifier le backend effectif. La configuration Playwright actuelle force SwiftShader ; la mesure matérielle de T19 nécessite un protocole distinct vérifié, sans présenter les chiffres logiciels comme résultats GPU.
 
 ### Annulation des gestes d'édition
 

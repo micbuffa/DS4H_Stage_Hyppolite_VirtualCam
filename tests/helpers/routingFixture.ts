@@ -1,11 +1,12 @@
 import { vi } from 'vitest';
 import type { CameraId } from '../../src/domain/cameras/cameraDefinition';
 import type { ScreenId } from '../../src/domain/direction/screenRouting';
-import type { RoutableFeed } from '../../src/application/ports/routing';
+import type { RoutableFeed, RoutingResources } from '../../src/application/ports/routing';
 import { CameraRegistry } from '../../src/domain/cameras/cameraRegistry';
 import { createCameraPresets } from '../../src/domain/cameras/cameraPresets';
 import { FeedRouter } from '../../src/application/commands/feedRouter';
 import { RoutingDirector } from '../../src/application/commands/routingDirector';
+import type { TransitionDriver } from '../../src/application/ports/transition';
 
 export function deferred() {
   let resolve!: () => void;
@@ -17,7 +18,7 @@ export interface FakeTexture { label: string }
 export interface FakeFeed extends RoutableFeed<FakeTexture> {
   id: CameraId; enabled: boolean; disposed: boolean; resolve(): void; reject(error: Error): void;
 }
-export function routingFixture() {
+export function routingFixture(driver?: TransitionDriver, isDragging?: () => boolean, createTemporary?: RoutingResources<FakeTexture>['createTemporary']) {
   const cameras = new CameraRegistry(createCameraPresets());
   const originals = new Map<ScreenId, FakeTexture>([1, 2, 3].map((id) => [id as ScreenId, { label: `offline-${id}` }]));
   const current = new Map(originals);
@@ -43,7 +44,7 @@ export function routingFixture() {
     return entry;
   });
   const waitForPresentation = vi.fn((): { ready: Promise<void>; dispose(): void } => ({ ready: Promise.resolve(), dispose: vi.fn() }));
-  const router = new FeedRouter({ screens, createFeed, waitForPresentation });
-  const director = new RoutingDirector(cameras, router);
+  const router = new FeedRouter<FakeTexture>({ screens, createFeed, createTemporary, waitForPresentation });
+  const director = new RoutingDirector(cameras, router, driver, isDragging);
   return { cameras, router, director, originals, current, screens, delayed, failures, feeds, createFeed, waitForPresentation, maxActive: () => maxActive };
 }

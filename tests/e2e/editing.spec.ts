@@ -18,7 +18,7 @@ async function begin(page: Page, axis = 'x') {
 }
 
 test('drags world axes and local rotation with observation locked, and updates every shared screen', async ({ page }) => {
-  test.setTimeout(60_000); // Six real GPU-driven gestures plus pixel reads under parallel SwiftShader load.
+  test.setTimeout(180_000); // Six real gestures and GPU reads also run on slower Windows/SwiftShader hosts.
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
@@ -97,7 +97,7 @@ for (const reason of ['Escape', 'blur', 'canvas-blur', 'pointercancel', 'lostpoi
 }
 
 test('moves and turns C4 during pause, then changes the framing of C8 on all screens', async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(180_000); // Several full GPU readbacks on the Windows/SwiftShader validation host.
   await page.goto('/tests/e2e/fixtures/editing.html');
   await expect(page.getByRole('status')).toHaveText('Prêt à explorer');
   const body = page.locator('body');

@@ -22,6 +22,9 @@ import { attachFeedQuality } from '../ui/attachFeedQuality';
 import type { AudienceOptions } from '../../../domain/concert/audienceLayout';
 import { attachConcertShow } from './attachConcertShow';
 import { createConcertScene } from './createObservationScene';
+import { PreviewController } from '../../../application/commands/previewController';
+import { createPreviewMonitor } from '../ui/createPreviewMonitor';
+import type { BaseTexture } from '@babylonjs/core/Materials/Textures/baseTexture';
 
 export function createBabylonRuntime(canvas: HTMLCanvasElement, audience?: AudienceOptions): RenderRuntime {
   const engine = new Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false });
@@ -33,14 +36,22 @@ export function createBabylonRuntime(canvas: HTMLCanvasElement, audience?: Audie
     const registry = new CameraRegistry(createCameraPresets());
     const cameras = createCaptureCameras(scene, registry);
     const renderer = createRoutingRenderer(scene, screens, cameras);
-    const director = new RoutingDirector(registry, renderer);
-    const detachQuality = attachFeedQuality(canvas.ownerDocument, (quality) => renderer.setQuality(quality));
+    const panel = createDirectorPanel(scene);
+    const monitor = createPreviewMonitor(scene, panel.root, undefined, undefined, renderer.referenceTexture, renderer.createTravelComposition);
+    const driver = renderer.createTransitionDriver(canvas.ownerDocument);
+    const preview: PreviewController<BaseTexture> = new PreviewController(registry, renderer, monitor, driver, () => {
+      const state = director.snapshot();
+      return { routes: state.routes, targets: state.targets, settings: director.transitionSettings(), blocked: state.pending !== null || !!state.qualityPending };
+    }, () => editor.snapshot().dragging);
+    const director: RoutingDirector = new RoutingDirector(registry, renderer, driver, () => editor.snapshot().dragging, preview);
+    const detachQuality = attachFeedQuality(canvas.ownerDocument, (quality) => director.changeQuality(() => renderer.setQuality(quality)), director);
+    const editor: CameraEditor = new CameraEditor(registry, createEditingNavigation(scene.activeCamera as ArcRotateCamera, canvas), (id) => director.isCameraLocked(id));
+    const detachEditingLock = director.subscribe(() => editor.refreshAvailability());
+    const detachPreviewLock = preview.subscribe(() => editor.refreshAvailability());
     const initialization = director.initialize();
     void initialization.catch(() => undefined);
-    const editor = new CameraEditor(registry, createEditingNavigation(scene.activeCamera as ArcRotateCamera, canvas));
-    const panel = createDirectorPanel(scene);
     const goHome = () => { canvas.blur(); resetObserver(scene.activeCamera as ArcRotateCamera); canvas.focus({ preventScroll: true }); };
-    const panelCommands = new DirectorPanel(registry, director, editor, { render: (model) => { panel.render(model); panelReadout(canvas.ownerDocument, model); } }, goHome, show.clock);
+    const panelCommands = new DirectorPanel(registry, director, editor, { render: (model) => { panel.render(model); monitor.setStatus(model.previewLabel); panelReadout(canvas.ownerDocument, model); } }, goHome, show.clock, preview);
     const detachPanelPicking = attachPanelPicking(canvas, scene.activeCamera!, panel, panelCommands);
     const showHelp = () => { void panelCommands.activate('help'); };
     const helpButton = canvas.ownerDocument.getElementById('show-help');
@@ -74,6 +85,10 @@ export function createBabylonRuntime(canvas: HTMLCanvasElement, audience?: Audie
         helpButton?.removeEventListener('click', showHelp);
         detachPanelPicking();
         panelCommands.dispose();
+        detachEditingLock();
+        detachPreviewLock();
+        preview.dispose();
+        monitor.dispose();
         panel.dispose();
         detachEditingControls();
         gizmos.dispose();

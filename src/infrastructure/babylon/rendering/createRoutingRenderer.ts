@@ -11,8 +11,20 @@ import type { RoutingTable, ScreenId } from '../../../domain/direction/screenRou
 import type { ScreenTexturePort } from '../../../application/ports/cameraFeed';
 import { createCameraFeed } from './createCameraFeed';
 import { watchSceneReadiness } from '../engine/watchSceneReadiness';
+import { createTransitionComposition } from './createTransitionComposition';
+import { createTransitionDriver } from './createTransitionDriver';
+import type { TransitionCompositionPort } from '../../../application/ports/transition';
+import { createTravelCameraFeed } from '../cameras/createTravelCameraFeed';
+import { createTravelComposition } from './createTravelComposition';
+import type { TransitionSurfaces } from './createTransitionComposition';
 
-export function createRoutingRenderer(scene: Scene, screens: ReturnType<typeof createScreens>, cameras: ReturnType<typeof createCaptureCameras>, dependencies = { createFeed: createCameraFeed, waitForPresentation: watchSceneReadiness }) {
+interface RoutingRendererDependencies {
+  createFeed: typeof createCameraFeed;
+  waitForPresentation: typeof watchSceneReadiness;
+  createComposition?: (scene: Scene, screens: ReturnType<typeof createScreens>) => TransitionCompositionPort<BaseTexture>;
+}
+
+export function createRoutingRenderer(scene: Scene, screens: ReturnType<typeof createScreens>, cameras: ReturnType<typeof createCaptureCameras>, dependencies: RoutingRendererDependencies = { createFeed: createCameraFeed, waitForPresentation: watchSceneReadiness }) {
   const previous = screens.screens.map((screen) => screen.material.emissiveTexture);
   const fallbacks = screens.screens.map((screen) => {
     const texture = RawTexture.CreateRGBATexture(createTestPattern(screen.definition.id, screen.definition.name, true), 512, 288, scene, false, false, Texture.NEAREST_SAMPLINGMODE);
@@ -28,6 +40,7 @@ export function createRoutingRenderer(scene: Scene, screens: ReturnType<typeof c
   const router = new FeedRouter<BaseTexture>({
     screens: ports,
     createFeed: (id) => dependencies.createFeed(scene, cameras.rigs.get(id)!.camera, feedSizeFor(quality)),
+    createTemporary: (pose) => createTravelCameraFeed(scene, cameras.root, pose, feedSizeFor(quality), dependencies.createFeed),
     waitForPresentation: () => dependencies.waitForPresentation(scene),
   });
   let disposed = false;
@@ -41,8 +54,13 @@ export function createRoutingRenderer(scene: Scene, screens: ReturnType<typeof c
   };
   const onDispose = scene.onDisposeObservable.add(dispose);
   return {
-    prepare: (routes: RoutingTable) => router.prepare(routes),
+    createTravelComposition: (surfaces: TransitionSurfaces) => createTravelComposition(scene, surfaces, router, dependencies.waitForPresentation),
+    createTransitionDriver: (document: Document) => createTransitionDriver(scene, document, router, (dependencies.createComposition ?? createTransitionComposition)(scene, screens), createTravelComposition(scene, screens, router, dependencies.waitForPresentation)),
+    prepare: (routes: RoutingTable, signal?: AbortSignal) => router.prepare(routes, signal),
     stats: () => router.stats(),
+    retain: router.retain.bind(router),
+    retainTemporary: router.retainTemporary.bind(router),
+    referenceTexture: (id: ScreenId) => ports.get(id)!.getTexture(),
     async setQuality(next: string) {
       const size = feedSizeFor(next);
       if (disposed) throw new Error('La régie est arrêtée.');

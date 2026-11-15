@@ -21,11 +21,12 @@ vi.mock('../../src/infrastructure/babylon/interaction/attachObserverKeyboard', (
 vi.mock('../../src/infrastructure/babylon/engine/watchSceneReadiness', () => ({ watchSceneReadiness: () => ({ ready: Promise.resolve(), dispose: vi.fn() }) }));
 vi.mock('../../src/infrastructure/babylon/cameras/createCaptureCameras', () => ({ createCaptureCameras: () => ({ dispose: disposeCameras, rigs: new Map([[1, { camera: {} }]]) }) }));
 vi.mock('../../src/infrastructure/babylon/interaction/attachCameraControls', () => ({ attachCameraControls: () => detachCameraControls }));
-vi.mock('../../src/infrastructure/babylon/rendering/createRoutingRenderer', () => ({ createRoutingRenderer: () => ({ prepare: vi.fn().mockResolvedValue({ commit: async () => undefined, complete: vi.fn(), rollback: vi.fn() }), dispose: disposeFeed }) }));
+vi.mock('../../src/infrastructure/babylon/rendering/createRoutingRenderer', () => ({ createRoutingRenderer: () => ({ createTransitionDriver: () => undefined, prepare: vi.fn().mockResolvedValue({ commit: async () => undefined, complete: vi.fn(), rollback: vi.fn() }), dispose: disposeFeed }) }));
 vi.mock('../../src/infrastructure/babylon/ui/attachRoutingControls', () => ({ attachRoutingControls: () => vi.fn() }));
 vi.mock('../../src/infrastructure/babylon/interaction/createCameraGizmos', () => ({ createCameraGizmos: () => ({ dispose: vi.fn() }) }));
 vi.mock('../../src/infrastructure/babylon/ui/attachEditingControls', () => ({ attachEditingControls: () => vi.fn() }));
 vi.mock('../../src/infrastructure/babylon/ui/createDirectorPanel', () => ({ createDirectorPanel: () => ({ render: vi.fn(), dispose: vi.fn() }) }));
+vi.mock('../../src/infrastructure/babylon/ui/createPreviewMonitor', () => ({ createPreviewMonitor: () => ({ show: vi.fn(), present: async () => undefined, prepare: vi.fn(), setStatus: vi.fn(), dispose: vi.fn() }) }));
 vi.mock('../../src/infrastructure/babylon/ui/panelReadout', () => ({ panelReadout: vi.fn() }));
 vi.mock('../../src/infrastructure/babylon/interaction/attachPanelPicking', () => ({ attachPanelPicking: () => vi.fn() }));
 vi.mock('@babylonjs/core/Engines/engine', () => ({ Engine: class { constructor() { return engine; } } }));

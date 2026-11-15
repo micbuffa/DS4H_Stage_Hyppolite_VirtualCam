@@ -15,12 +15,19 @@
         <strong id="selected-camera">Sélection : C1</strong>
         <div class="visually-hidden" aria-live="polite"><p id="route-1"></p><p id="route-2"></p><p id="route-3"></p></div><p class="muted" id="feed-status">Préparation des écrans…</p>
         <p id="panel-message" aria-live="polite">Préparation…</p>
+        <p id="transition-status" class="muted">Transition préparée : Coupe · 0 ms</p>
+        <p id="preview-status" class="muted">Aperçu désactivé</p>
         <nav aria-label="Navigation et aide"><button id="home-view" type="button">Vue régie (R)</button><button id="show-help" type="button">Aide</button></nav>
       </aside>
       <section id="help-text" class="help-text" aria-label="Aide du laboratoire" hidden>
         <h2>Réaliser le concert</h2>
         <p>Choisir une caméra par son boîtier ou le panneau. La sélection seule conserve le direct.</p>
         <p>Cocher les écrans cibles puis DIFFUSER. ✓ = cible ; SÉLECTION = caméra choisie ; EN DIFFUSION = source à l’antenne.</p>
+        <p>TRANSITIONS propose Coupe, les deux fondus, Volet, Rolling Cubes, Mosaïque, Grid Morph, Glitch, Zoom, Volet de luminance et Écran partagé. Régler la durée de 100 à 3 000 ms et la direction du volet. RÉGLAGES GRILLE ou RÉGLAGES EFFET ouvre les paramètres disponibles. RETOUR EFFETS retrouve le choix du passage. Le zoom transforme les images ; l’écran partagé conserve les deux cadrages complets avec des bandes. DIFFUSER lance le passage ; ANNULER TRANSITION rétablit les sources précédentes. ÉDITION retrouve les commandes de cadrage.</p>
+        <p>TRAJET VIRTUEL déplace un point de vue temporaire entre les deux cadrages, sans déplacer les caméras. Durée de 500 à 10 000 ms, par pas de 500 ms ; les écrans sont parcourus successivement. POINTS DU TRAJET propose jusqu’à trois points : AJOUTER, POINT SUIVANT, AXE X/Y/Z, −/+ 0,5 m et SUPPRIMER. Sans point, le trajet est direct. TESTER L’EFFET le joue seulement sur le moniteur. Un chemin bloqué est refusé : déplacer les points ou choisir un effet 2D. Le contrôle des structures ne garantit pas la visibilité du sujet ; inspecter le trajet avant de diffuser.</p>
+        <p>PRÉVISUALISER active le moniteur hors direct ; la sélection suivante remplace son image après préparation. Son libellé indique la caméra réellement affichée. TESTER L’EFFET utilise l’écran ciblé de plus petit numéro comme référence, sans changer les écrans du concert. ARRÊTER LE TEST retrouve l’aperçu simple ; MASQUER L’APERÇU le désactive. La diffusion et le changement de qualité suspendent l’aperçu et le rétablissent ensuite.</p>
+        <p>SÉQUENCE ouvre le mode SIMULTANÉ/DÉCALÉ, les six ordres possibles et le DÉLAI −/+ de 0 à 1 000 ms par pas de 100 ms. En décalé, chaque écran attend la fin du précédent et le délai ; les écrans déjà sur la destination sont ignorés. Le résumé indique l’ordre effectif et le total avant DIFFUSER. Le trajet impose le décalé ; une coupe avec délai nul reste instantanée. ANNULER TRANSITION restaure tous les écrans, même ceux déjà passés. RETOUR EFFETS retrouve le catalogue.</p>
+        <p>Les caméras participantes sont verrouillées pendant le passage ; les autres restent éditables. La pause du concert n'arrête pas une transition. Masquer l'onglet la suspend, sans saut au retour. Échap conserve son rôle d'édition des caméras.</p>
         <p>DÉPLACER : axes/plans monde. ORIENTER : anneaux locaux. Relâcher valide, Échap annule le geste ou quitte l’outil. Le FOV vertical varie de 20° à 90°.</p>
         <p>ZQSD / flèches : déplacement · Glisser : orbite · Molette / deux doigts : zoom · Clic droit : déplacer la vue.</p>
         <p>R : retrouver la régie · H : afficher/masquer le frustum. Une caméra peut traverser le décor. PAUSE fige le concert. Les caméras et les écrans restent utilisables.</p>

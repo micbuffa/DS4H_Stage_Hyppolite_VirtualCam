@@ -17,9 +17,15 @@ export function assertCameraId(id: number): asserts id is CameraId {
 
 export function validateCamera(definition: CameraDefinition): void {
   assertCameraId(definition.id);
+  if (!definition.name.trim()) throw new Error('Paramètres de caméra invalides.');
+  validateCameraView(definition);
+}
+
+/** Shared optical/pose constraints, also applicable outside the numbered registry. */
+export function validateCameraView(definition: Pick<CameraDefinition, 'pose' | 'fovDegrees' | 'near' | 'far'>): void {
   if (definition.pose.position.length !== 3 || definition.pose.rotation.length !== 4) throw new Error('Pose caméra incomplète.');
   const { position: [x, y, z], rotation } = definition.pose;
-  if (!definition.name.trim() || ![x, y, z, ...rotation, definition.fovDegrees, definition.near, definition.far].every(Number.isFinite)) throw new Error('Paramètres de caméra invalides.');
+  if (![x, y, z, ...rotation, definition.fovDegrees, definition.near, definition.far].every(Number.isFinite)) throw new Error('Paramètres de caméra invalides.');
   if (x < -35 || x > 35 || y < 0.5 || y > 25 || z < -35 || z > 25) throw new Error('Position caméra hors limites.');
   if (rotation.length !== 4 || Math.abs(Math.hypot(...rotation) - 1) > 1e-5) throw new Error('Rotation caméra invalide.');
   if (definition.fovDegrees < 20 || definition.fovDegrees > 90 || definition.near <= 0 || definition.far <= definition.near) throw new Error('Objectif caméra invalide.');

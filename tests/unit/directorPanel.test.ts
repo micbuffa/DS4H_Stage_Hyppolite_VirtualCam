@@ -97,3 +97,142 @@ it('consumes one pointer gesture into at most one matching click and cancels dra
   gesture.begin(1, 'camera-4', 0, 0); gesture.cancel(); expect(gesture.release(1, 'camera-4')).toBeNull();
   gesture.begin(1, null, 0, 0); expect(gesture.release(1, null)).toBeNull();
 });
+
+it('paginates transition controls and prepares bounded mode, duration and direction without changing the direct', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize();
+    expect(f.state('transition-next').visible).toBe(false);
+    await f.panel.activate('transition-page');
+    expect(f.state('transition-next').visible).toBe(true); expect(f.state('move').visible).toBe(false);
+    expect(f.state('duration-plus').enabled).toBe(false);
+    await f.panel.activate('transition-next'); expect(f.panel.model().transitionLabel).toBe('Fondu enchaîné · 600 ms · Simultané');
+    await f.panel.activate('duration-plus'); expect(f.director.transitionSettings().durationMs).toBe(700);
+    await f.panel.activate('duration-minus'); expect(f.director.transitionSettings().durationMs).toBe(600);
+    await f.panel.activate('transition-next'); await f.panel.activate('transition-next');
+    expect(f.panel.model().transitionLabel).toContain('Volet');
+    await f.panel.activate('wipe-direction'); expect(f.director.transitionSettings().parameters.direction).toBe('right');
+    expect(f.director.snapshot().routes).toEqual({ 1: 1, 2: 1, 3: 1 });
+    await f.panel.activate('transition-prev'); expect(f.director.transitionSettings().mode).toBe('dip-black');
+    await f.panel.activate('transition-page'); expect(f.state('move').visible).toBe(true);
+  } finally { f.dispose(); }
+});
+
+it('exposes grid settings on a separate page and preserves the direct', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize(); await f.panel.activate('transition-page');
+    for (let index = 0; index < 6; index++) await f.panel.activate('transition-next');
+    expect(f.panel.model().transitionLabel).toContain('Grid Morph');
+    await f.panel.activate('wipe-direction');
+    expect(f.state('transition-next').visible).toBe(false); expect(f.state('grid-size').visible).toBe(true);
+    expect(f.state('seed-minus').enabled).toBe(false);
+    await f.panel.activate('grid-size'); await f.panel.activate('seed-plus'); await f.panel.activate('grid-strength');
+    expect(f.director.transitionSettings().parameters).toMatchObject({ columns: 16, rows: 9, seed: 1, strength: 0.4 });
+    await f.panel.activate('seed-minus'); expect(f.director.transitionSettings().parameters.seed).toBe(0);
+    await f.panel.activate('wipe-direction'); await f.panel.activate('transition-prev');
+    expect(f.panel.model().transitionLabel).toContain('Mosaïque');
+    await f.panel.activate('wipe-direction'); expect(f.state('grid-strength').enabled).toBe(false);
+    await f.panel.activate('transition-page'); await f.panel.activate('transition-page');
+    expect(f.state('transition-next').visible).toBe(true); expect(f.state('grid-size').visible).toBe(false);
+    await f.panel.activate('transition-prev'); expect(f.panel.model().transitionLabel).toContain('Rolling Cubes');
+    expect(f.director.snapshot().routes).toEqual({ 1: 1, 2: 1, 3: 1 });
+    expect(f.panel.model().error).toBe(false);
+  } finally { f.dispose(); }
+});
+
+it('cycles twelve available modes and exposes only relevant complementary settings without touching the direct', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize(); await f.panel.activate('transition-page');
+    const modes = new Set<string>();
+    for (let index = 0; index < 12; index++) { modes.add(f.director.transitionSettings().mode); await f.panel.activate('transition-next'); }
+    expect(modes.size).toBe(12); expect(modes.has('virtual-travel')).toBe(true);
+    expect(f.director.transitionSettings().mode).toBe('cut');
+    f.director.configureTransition({ mode: 'zoom' }); await f.panel.activate('wipe-direction');
+    expect(f.state('grid-size')).toMatchObject({ visible: true, enabled: false }); expect(f.state('seed-plus').enabled).toBe(false);
+    await f.panel.activate('grid-strength'); expect(f.director.transitionSettings().parameters.strength).toBe(0.4);
+    f.director.configureTransition({ mode: 'glitch' });
+    expect(f.state('grid-size').label).toBe('BANDES'); await f.panel.activate('grid-size'); await f.panel.activate('seed-plus');
+    expect(f.director.transitionSettings().parameters).toMatchObject({ columns: 16, rows: 9, seed: 1 });
+    f.director.configureTransition({ mode: 'luma-wipe' }); expect(f.state('grid-strength').label).toBe('DOUCEUR');
+    await f.panel.activate('wipe-direction'); f.director.configureTransition({ mode: 'split' });
+    expect(f.state('wipe-direction').enabled).toBe(false);
+    expect(f.director.snapshot().routes).toEqual({ 1: 1, 2: 1, 3: 1 }); expect(f.panel.model().error).toBe(false);
+  } finally { f.dispose(); }
+});
+
+it('offers travel duration bounds and restores 2D duration/order when leaving the travel family', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize(); await f.panel.activate('transition-page'); await f.panel.activate('transition-prev');
+    expect(f.director.transitionSettings()).toMatchObject({ mode: 'virtual-travel', durationMs: 2000, order: 'staggered' });
+    expect(f.panel.model().transitionLabel).toContain('Séquentiel'); expect(f.panel.model().message).toContain('Trajets successifs');
+    await f.panel.activate('duration-plus'); expect(f.director.transitionSettings().durationMs).toBe(2500);
+    for (let i = 0; i < 4; i++) await f.panel.activate('duration-minus');
+    expect(f.director.transitionSettings().durationMs).toBe(500); expect(f.state('duration-minus').enabled).toBe(false);
+    for (let i = 0; i < 19; i++) await f.panel.activate('duration-plus');
+    expect(f.director.transitionSettings().durationMs).toBe(10000); expect(f.state('duration-plus').enabled).toBe(false);
+    await f.panel.activate('transition-prev'); expect(f.director.transitionSettings()).toMatchObject({ mode: 'split', durationMs: 600, order: 'simultaneous' });
+  } finally { f.dispose(); }
+});
+
+it('edits up to three bounded waypoint coordinates on a distinct page without changing a camera or the direct', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize(); f.cameras.select(4); const poses = f.cameras.snapshot(), routes = f.director.snapshot().routes;
+    await f.panel.activate('transition-page'); await f.panel.activate('transition-prev'); await f.panel.activate('wipe-direction');
+    expect(f.panel.model().travelPage).toBe(true); expect(f.state('travel-minus').enabled).toBe(false); expect(f.state('grid-size').visible).toBe(false);
+    expect(f.state('transition-next').visible).toBe(false); expect(f.state('wipe-direction').visible).toBe(false);
+    await f.panel.activate('travel-add'); expect(f.director.transitionSettings().waypoints).toEqual([[0, 6.3, -9.35]]);
+    await f.panel.activate('travel-plus'); await f.panel.activate('travel-axis'); await f.panel.activate('travel-plus');
+    await f.panel.activate('travel-axis'); await f.panel.activate('travel-minus');
+    expect(f.director.transitionSettings().waypoints).toEqual([[0.5, 6.8, -9.85]]);
+    await f.panel.activate('travel-add'); await f.panel.activate('travel-add'); expect(f.state('travel-add').enabled).toBe(false);
+    expect(f.director.transitionSettings().waypoints).toHaveLength(3); await f.panel.activate('travel-point'); expect(f.state('travel-point').detail).toBe('1 / 3');
+    await f.panel.activate('travel-remove'); expect(f.director.transitionSettings().waypoints).toHaveLength(2);
+    f.director.configureTransition({ mode: 'virtual-travel', waypoints: [[35, 0.5, -35]] });
+    expect(f.state('travel-minus').enabled).toBe(false); // Z lower bound
+    await f.panel.activate('travel-axis'); expect(f.state('travel-plus').enabled).toBe(false); // X upper bound
+    await f.panel.activate('travel-axis'); expect(f.state('travel-minus').enabled).toBe(false); // Y lower bound
+    await f.panel.activate('travel-back'); expect(f.panel.model().travelPage).toBe(false); expect(f.state('transition-next').visible).toBe(true);
+    expect(f.director.snapshot().routes).toEqual(routes); expect(f.cameras.snapshot()).toEqual(poses);
+  } finally { f.dispose(); }
+});
+
+it('configures sequence order and bounded delay independently of the direct and preserves the 2D preference around travel', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize(); f.cameras.select(4); const routes = f.director.snapshot().routes;
+    await f.panel.activate('transition-page'); await f.panel.activate('sequence-page');
+    expect(f.panel.model().sequencePage).toBe(true); expect(f.state('transition-next').visible).toBe(false);
+    expect(f.state('delay-plus').enabled).toBe(false); await f.panel.activate('sequence-mode');
+    expect(f.director.transitionSettings().order).toBe('staggered'); expect(f.state('delay-minus').enabled).toBe(false);
+    for (let i = 0; i < 10; i++) await f.panel.activate('delay-plus');
+    expect(f.director.transitionSettings().delayMs).toBe(1000); expect(f.state('delay-plus').enabled).toBe(false);
+    await f.panel.activate('delay-minus'); expect(f.director.transitionSettings().delayMs).toBe(900);
+    const orders = new Set<string>();
+    for (let i = 0; i < 6; i++) { orders.add(f.director.transitionSettings().screenOrder.join()); await f.panel.activate('sequence-order'); }
+    expect(orders.size).toBe(6); expect(f.panel.model().message).toContain('Total');
+    await f.panel.activate('sequence-back'); await f.panel.activate('transition-prev'); // travel
+    await f.panel.activate('sequence-page'); expect(f.state('sequence-mode').enabled).toBe(false);
+    await f.panel.activate('sequence-back'); await f.panel.activate('transition-prev'); // split
+    expect(f.director.transitionSettings().order).toBe('staggered');
+    expect(f.director.snapshot().routes).toEqual(routes); expect(f.state('broadcast').enabled).toBe(true);
+    await f.panel.activate('transition-page'); expect(f.state('sequence-page').visible).toBe(false);
+  } finally { f.dispose(); }
+});
+
+it('maps cancellation without presenting it as a command error', async () => {
+  const f = fixture();
+  try {
+    await f.director.initialize(); await f.panel.activate('transition-page');
+    f.delayed.add(4); await f.panel.activate('camera-4');
+    const pending = f.panel.activate('broadcast');
+    expect(f.state('cancel-transition').enabled).toBe(true);
+    await f.panel.activate('cancel-transition'); await pending;
+    expect(f.panel.model().error).toBe(false);
+    expect(f.panel.model().message).toContain('Transition annulée');
+    expect(f.director.snapshot().routes).toEqual({ 1: 1, 2: 1, 3: 1 });
+  } finally { f.dispose(); }
+});

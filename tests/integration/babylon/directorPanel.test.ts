@@ -13,7 +13,7 @@ it('owns spatial keys, text faces and textures, excludes the whole panel from fe
   const baseline = { meshes: [...scene.meshes], textures: [...scene.textures], materials: [...scene.materials] };
   const panel = createDirectorPanel(scene, (scene) => ({ texture: RawTexture.CreateRGBATexture(new Uint8Array([30, 40, 50, 255]), 1, 1, scene), draw: () => undefined }));
   try {
-    expect(panel.buttons.size).toBe(24);
+    expect(panel.buttons.size).toBe(53);
     const cameras = new CameraRegistry(createCameraPresets());
     panel.render(directorPanelModel(cameras.snapshot(), { selectedId: 1, targets: [1], routes: { 1: 1, 2: 1, 3: 1 }, pending: null, error: null }, { mode: null, dragging: false, error: null }, false, null));
     for (const mesh of panel.root.getChildMeshes()) { expect(mesh.metadata.category).toBe('panel'); expect(isFilmable(mesh.metadata)).toBe(false); expect(mesh.layerMask).toBe(2); }

@@ -32,8 +32,8 @@ export function createCameraGizmos(scene: Scene, cameras: ReturnType<typeof crea
     const state = editor.snapshot();
     if (!state.dragging) { move.releaseDrag(); rotate.releaseDrag(); }
     const root = cameras.rigs.get(registry.snapshot().selectedId)!.root;
-    const moveNode = state.mode === 'move' ? root : null;
-    const rotateNode = state.mode === 'rotate' ? root : null;
+    const moveNode = state.mode === 'move' && !state.locked ? root : null;
+    const rotateNode = state.mode === 'rotate' && !state.locked ? root : null;
     if (move.attachedNode !== moveNode) move.attachedNode = moveNode;
     if (rotate.attachedNode !== rotateNode) rotate.attachedNode = rotateNode;
   };
